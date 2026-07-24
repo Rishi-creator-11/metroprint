@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MetroPrint USA
+
+Professional custom printing and marketing services website built with Next.js, Supabase, and Resend.
+
+## Features
+
+- **Product catalog** — Browse 23+ products across 5 categories with images and configurable options
+- **Quote request workflow** — Customers select specs, upload artwork, and submit quote requests
+- **File uploads** — Multiple artwork files stored in Supabase Storage (PDF, PNG, JPG, AI, PSD, EPS, SVG)
+- **Email notifications** — MetroPrint receives email alerts via Resend; customers get confirmation emails
+- **Admin dashboard** — View, filter, and manage quote requests with status updates and internal notes
+- **Mobile responsive** — Clean, professional design that works on all screen sizes
+
+## Tech Stack
+
+- Next.js 16 (App Router)
+- TypeScript
+- Tailwind CSS 4
+- Supabase (Database, Storage, Auth)
+- Resend (Email)
+- Vercel (Deployment)
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Set up Supabase
+
+1. Create a project at [supabase.com](https://supabase.com)
+2. Run the migration in `supabase/migrations/001_initial.sql` via the SQL Editor
+3. Run the seed file in `supabase/seed.sql` to populate products
+4. Create an admin user in **Authentication → Users → Add User**
+
+### 3. Configure environment variables
+
+Copy `.env.example` to `.env.local` and fill in your values:
+
+```bash
+cp .env.example .env.local
+```
+
+### 4. Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) for the site and [http://localhost:3000/admin/login](http://localhost:3000/admin/login) for the admin dashboard.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Pages
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Route | Description |
+|-------|-------------|
+| `/` | Homepage with hero, categories, popular products, how it works |
+| `/products` | Full product catalog with category filters |
+| `/products/[slug]` | Individual product page with quote form |
+| `/request-quote` | General quote request page |
+| `/contact` | Contact information |
+| `/admin/login` | Admin authentication |
+| `/admin/dashboard` | Manage quote requests |
+| `/admin/dashboard/[id]` | View and update individual requests |
 
-## Learn More
+## Deployment (Vercel)
 
-To learn more about Next.js, take a look at the following resources:
+1. Push to GitHub
+2. Import project in Vercel
+3. Add environment variables from `.env.example`
+4. Deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Adding New Products
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Products use a JSON `options_schema` for dynamic form fields. Add a row to the `products` table or extend `src/lib/products-data.ts` for local fallback:
 
-## Deploy on Vercel
+```json
+{
+  "fields": [
+    {
+      "name": "quantity",
+      "label": "Quantity",
+      "type": "select",
+      "options": ["50", "100", "250"],
+      "required": true
+    }
+  ]
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Supported field types: `select`, `radio`, `text`, `textarea`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+Private — MetroPrint USA
