@@ -28,6 +28,7 @@ export interface Product {
   title: string;
   slug: string;
   category: ProductCategory;
+  subcategory?: string | null;
   description: string;
   base_price_text: string;
   price: number;

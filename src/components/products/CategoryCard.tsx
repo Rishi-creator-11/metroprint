@@ -4,17 +4,18 @@ import { ArrowRight } from "lucide-react";
 import type { ProductCategory } from "@/lib/types";
 
 interface CategoryCardProps {
-  name: ProductCategory;
+  name: ProductCategory | string;
   description: string;
   image: string;
+  href?: string;
 }
 
-export function CategoryCard({ name, description, image }: CategoryCardProps) {
-  const href = `/products?category=${encodeURIComponent(name)}`;
+export function CategoryCard({ name, description, image, href }: CategoryCardProps) {
+  const resolvedHref = href ?? `/products?category=${encodeURIComponent(name)}`;
 
   return (
     <Link
-      href={href}
+      href={resolvedHref}
       className="group flex flex-col overflow-hidden rounded-xl bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
     >
       <div className="relative h-36 overflow-hidden">

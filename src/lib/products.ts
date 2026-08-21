@@ -8,12 +8,37 @@ import { CATEGORIES } from "@/lib/constants";
 import { withProductPrice } from "@/lib/product-prices";
 import type { Product } from "@/lib/types";
 
+const BUSINESS_CARD_IMAGES: Record<string, string> = {
+  "business-cards-standard": "https://images.pexels.com/photos/4862950/pexels-photo-4862950.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+  "business-cards-premium-metallic-foil-raised": "https://images.pexels.com/photos/6149103/pexels-photo-6149103.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+  "business-cards-premium-kraft-paper": "https://images.pexels.com/photos/8250871/pexels-photo-8250871.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+  "business-cards-premium-durable": "https://images.pexels.com/photos/8066713/pexels-photo-8066713.png?auto=compress&cs=tinysrgb&h=650&w=940",
+  "business-cards-premium-spot-uv-raised": "https://images.pexels.com/photos/5706018/pexels-photo-5706018.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+  "business-cards-premium-soft-touch-suede": "https://images.pexels.com/photos/4862926/pexels-photo-4862926.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+  "business-cards-premium-32pt-painted-edge": "https://images.pexels.com/photos/9878733/pexels-photo-9878733.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+  "business-cards-specialty-fold-over": "https://images.pexels.com/photos/9869077/pexels-photo-9869077.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+  "business-cards-specialty-plastic": "https://images.pexels.com/photos/7821730/pexels-photo-7821730.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+  "business-cards-specialty-magnetic": "https://images.pexels.com/photos/15569097/pexels-photo-15569097.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+};
+
 function mapSeedToProduct(
   seed: (typeof SEED_PRODUCTS)[number],
   index: number
 ): Product {
+  const optionsSchema =
+    seed.category === "Business Cards"
+      ? {
+          ...seed.options_schema,
+          fields: seed.options_schema.fields.filter(
+            (field) => !["stock", "finish"].includes(field.name)
+          ),
+        }
+      : seed.options_schema;
+
   return withProductPrice({
     ...seed,
+    image_url: BUSINESS_CARD_IMAGES[seed.slug] ?? seed.image_url,
+    options_schema: optionsSchema,
     id: `seed-${index}`,
     created_at: new Date().toISOString(),
   }) as Product;
@@ -136,4 +161,44 @@ export async function getCategories(): Promise<string[]> {
       (order.indexOf(a as (typeof order)[number]) + 1 || 99) -
       (order.indexOf(b as (typeof order)[number]) + 1 || 99)
   );
+}
+
+export async function getBusinessCardsBySubcategory(
+  subcategory: string
+): Promise<Product[]> {
+  if (!isSupabaseConfigured()) {
+    return FALLBACK_PRODUCTS.filter(
+      (p) => p.category === "Business Cards" && p.subcategory === subcategory
+    );
+  }
+
+  try {
+    const supabase = await createClient();
+    const result = await withTimeout(
+      supabase
+        .from("products")
+        .select("*")
+        .eq("active", true)
+        .eq("category", "Business Cards")
+        .eq("subcategory", subcategory)
+        .order("title"),
+      SUPABASE_TIMEOUT_MS
+    );
+
+    if (!result || result.error || !result.data?.length) {
+      return FALLBACK_PRODUCTS.filter(
+        (p) => p.category === "Business Cards" && p.subcategory === subcategory
+      );
+    }
+    return result.data.map((p) =>
+      withProductPrice({
+        ...p,
+        price: p.price != null ? Number(p.price) : null,
+      })
+    ) as Product[];
+  } catch {
+    return FALLBACK_PRODUCTS.filter(
+      (p) => p.category === "Business Cards" && p.subcategory === subcategory
+    );
+  }
 }

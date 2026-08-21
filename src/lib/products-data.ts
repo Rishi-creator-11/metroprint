@@ -131,12 +131,14 @@ function premiumProduct(
   slug: string,
   description: string,
   options: OptionsSchema,
-  basePriceText = "Starting at $34/100"
+  basePriceText = "Starting at $34/100",
+  subcategory: "Premium" | "Custom" = "Premium"
 ): SeedProduct {
   return {
     title,
     slug,
     category: "Business Cards",
+    subcategory,
     description,
     base_price_text: basePriceText,
     image_url: BUSINESS_CARD_IMAGE,
@@ -429,6 +431,7 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
     title: "Standard Business Cards",
     slug: "business-cards-standard",
     category: "Business Cards",
+    subcategory: "Standard",
     description:
       "Standard business cards from MetroPrint USA (MKT1). Choose stock weight, matte or UV gloss finish, corner style, quantity, and sides.",
     base_price_text: "Starting at $29/500",
@@ -573,7 +576,8 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
         },
       ],
     },
-    "Starting at $37/100"
+    "Starting at $37/100",
+    "Custom"
   ),
   premiumProduct(
     "Plastic Business Cards",
@@ -625,7 +629,8 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
         },
       ],
     },
-    "Starting at $35/100"
+    "Starting at $35/100",
+    "Custom"
   ),
   premiumProduct(
     "Magnetic Business Cards",
@@ -670,7 +675,8 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
         },
       ],
     },
-    "Starting at $40/100"
+    "Starting at $40/100",
+    "Custom"
   ),
 
   // Print Materials
@@ -1146,6 +1152,7 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
       ],
     },
   },
+
 ];
 
 export function getSeedProductBySlug(slug: string) {
