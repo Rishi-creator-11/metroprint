@@ -1,5 +1,206 @@
 import type { Product, OptionsSchema } from "./types";
 
+const BUSINESS_CARD_IMAGE =
+  "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=800&h=600&fit=crop";
+
+const standardBusinessCardOptions: OptionsSchema = {
+  fields: [
+    {
+      name: "quantity",
+      label: "Quantity",
+      type: "select",
+      options: ["50", "100", "250", "500", "1000", "2500", "5000"],
+      required: true,
+    },
+    {
+      name: "stock",
+      label: "Stock",
+      type: "select",
+      options: ["14pt", "16pt", "18pt"],
+      required: true,
+    },
+    {
+      name: "finish",
+      label: "Finish",
+      type: "select",
+      options: ["Matte", "UV Gloss"],
+      required: true,
+    },
+    {
+      name: "corners",
+      label: "Corners",
+      type: "select",
+      options: ["Rectangle", "Rounded"],
+      required: true,
+    },
+    {
+      name: "sides",
+      label: "Sides",
+      type: "select",
+      options: ["Single Sided", "Double Sided"],
+      required: true,
+    },
+    {
+      name: "need_design_help",
+      label: "Need Design Help",
+      type: "radio",
+      options: ["Yes", "No"],
+      required: true,
+    },
+  ],
+};
+
+const BC_SIZE = ['3.5" x 2"'];
+const BC_QUANTITY = ["25", "50", "100", "250", "500", "1000", "2500"];
+const BC_CORNERS = ["Rectangle", "Rounded"];
+const BC_SIDES = ["Single Sided", "Double Sided"];
+
+const BC_LAMINATION_FIELD: OptionsSchema["fields"][number] = {
+  name: "lamination",
+  label: "Lamination",
+  type: "select",
+  options: ["Matte Lamination 2 Sided", "Soft Touch Lamination 2 Sided"],
+  required: true,
+};
+
+const PAINTED_EDGE_COLORS = [
+  "Metallic Yellow",
+  "Blue",
+  "Black",
+  "Yellow",
+  "Metallic Hot Pink",
+  "Metallic Green",
+  "Orange",
+  "Purple",
+  "Brown",
+  "Metallic Purple",
+  "Turquoise",
+  "Red",
+  "Metallic Blue",
+  "Pink",
+  "Metallic Gold",
+  "White (Not Painted)",
+  "Metallic Orange",
+];
+
+function premiumBaseOptions(extraFields: OptionsSchema["fields"] = []): OptionsSchema {
+  return {
+    fields: [
+      {
+        name: "quantity",
+        label: "Quantity",
+        type: "select",
+        options: BC_QUANTITY,
+        required: true,
+      },
+      {
+        name: "size",
+        label: "Size",
+        type: "select",
+        options: BC_SIZE,
+        required: true,
+      },
+      ...extraFields,
+      {
+        name: "corners",
+        label: "Corners",
+        type: "select",
+        options: BC_CORNERS,
+        required: true,
+      },
+      {
+        name: "sides",
+        label: "Sides",
+        type: "select",
+        options: BC_SIDES,
+        required: true,
+      },
+      {
+        name: "need_design_help",
+        label: "Need Design Help",
+        type: "radio",
+        options: ["Yes", "No"],
+        required: true,
+      },
+    ],
+  };
+}
+
+function premiumProduct(
+  title: string,
+  slug: string,
+  description: string,
+  options: OptionsSchema,
+  basePriceText = "Starting at $34/100"
+): SeedProduct {
+  return {
+    title,
+    slug,
+    category: "Business Cards",
+    description,
+    base_price_text: basePriceText,
+    image_url: BUSINESS_CARD_IMAGE,
+    active: true,
+    options_schema: options,
+  };
+}
+
+const businessCardOptions = (cardType: string): OptionsSchema => ({
+  fields: [
+    {
+      name: "quantity",
+      label: "Quantity",
+      type: "select",
+      options: ["50", "100", "250", "500", "1000", "2500", "5000"],
+      required: true,
+    },
+    {
+      name: "finish",
+      label: "Card Type",
+      type: "select",
+      options: [cardType],
+      required: true,
+    },
+    {
+      name: "sides",
+      label: "Sides",
+      type: "select",
+      options: ["Single Sided", "Double Sided"],
+      required: true,
+    },
+    {
+      name: "need_design_help",
+      label: "Need Design Help",
+      type: "radio",
+      options: ["Yes", "No"],
+      required: true,
+    },
+  ],
+});
+
+type SeedProduct = Omit<Product, "id" | "created_at" | "price">;
+
+function businessCardProduct(
+  line: "Standard" | "Premium" | "Specialty",
+  cardType: string,
+  slug: string,
+  description?: string
+): SeedProduct {
+  const title = `${line} ${cardType} Business Cards`;
+  return {
+    title,
+    slug,
+    category: "Business Cards",
+    description:
+      description ||
+      `${line} ${cardType} business cards from MetroPrint USA (MKT1). Upload your artwork, choose quantity and sides, and checkout online.`,
+    base_price_text: "Starting at $29/500",
+    image_url: BUSINESS_CARD_IMAGE,
+    active: true,
+    options_schema: businessCardOptions(cardType),
+  };
+}
+
 const quantityPrint = (opts: string[]): OptionsSchema => ({
   fields: [
     {
@@ -223,38 +424,106 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
     },
   },
 
-  // Print Materials
+  // Business Cards (MKT1)
   {
-    title: "Business Cards",
-    slug: "business-cards",
-    category: "Print Materials",
+    title: "Standard Business Cards",
+    slug: "business-cards-standard",
+    category: "Business Cards",
     description:
-      "Premium business cards with matte, glossy, or soft-touch finishes.",
+      "Standard business cards from MetroPrint USA (MKT1). Choose stock weight, matte or UV gloss finish, corner style, quantity, and sides.",
     base_price_text: "Starting at $29/500",
-    image_url:
-      "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=800&h=600&fit=crop",
+    image_url: BUSINESS_CARD_IMAGE,
     active: true,
-    options_schema: {
+    options_schema: standardBusinessCardOptions,
+  },
+  premiumProduct(
+    "Metallic Foil Business Cards",
+    "business-cards-premium-metallic-foil-raised",
+    "Raised foil business cards with silver or gold custom foil printing. High-end look for professional branding — MetroPrint USA (MKT1).",
+    premiumBaseOptions([
+      {
+        name: "foil_color",
+        label: "Foil Color",
+        type: "select",
+        options: [
+          "Gold metallic foil (front)",
+          "Silver metallic foil (front)",
+          "Gold metallic foil (both sides)",
+          "Silver metallic foil (both sides)",
+        ],
+        required: true,
+      },
+      BC_LAMINATION_FIELD,
+    ]),
+    "Starting at $43/100"
+  ),
+  premiumProduct(
+    "Kraft Paper Business Cards",
+    "business-cards-premium-kraft-paper",
+    "Natural kraft business cards with a rustic, eco-friendly look. 100% recyclable — best for bold, dark-colored designs. MetroPrint USA (MKT1).",
+    premiumBaseOptions()
+  ),
+  premiumProduct(
+    "Durable Business Cards",
+    "business-cards-premium-durable",
+    "Waterproof and tear-resistant synthetic business cards. 100% recyclable and built to last in tough conditions — MetroPrint USA (MKT1).",
+    premiumBaseOptions()
+  ),
+  premiumProduct(
+    "Spot UV Business Cards",
+    "business-cards-premium-spot-uv-raised",
+    "Laminated business cards with raised clear spot UV gloss applied to areas of your choice. Adds tactile, premium detail — MetroPrint USA (MKT1).",
+    premiumBaseOptions([
+      BC_LAMINATION_FIELD,
+      {
+        name: "spot_uv",
+        label: "Spot UV",
+        type: "select",
+        options: ["One sided", "Both sides"],
+        required: true,
+      },
+    ]),
+    "Starting at $44/100"
+  ),
+  premiumProduct(
+    "Soft Touch Business Cards",
+    "business-cards-premium-soft-touch-suede",
+    "Soft touch (suede) business cards with a luxurious velvet-like surface. 19pt thickness with scratch and smudge protection — MetroPrint USA (MKT1).",
+    premiumBaseOptions(),
+    "Starting at $27/25"
+  ),
+  premiumProduct(
+    "32pt Painted Edge Business Cards",
+    "business-cards-premium-32pt-painted-edge",
+    "Thick 32pt uncoated business cards with painted colored edges. Choose from popular edge colors for a bold first impression — MetroPrint USA (MKT1).",
+    {
       fields: [
         {
           name: "quantity",
           label: "Quantity",
           type: "select",
-          options: ["50", "100", "250", "500", "1000", "2500", "5000"],
+          options: ["100", "250", "500", "1000", "2500"],
           required: true,
         },
         {
-          name: "finish",
-          label: "Finish",
+          name: "size",
+          label: "Size",
           type: "select",
-          options: ["Matte", "Glossy", "Soft Touch"],
+          options: BC_SIZE,
+          required: true,
+        },
+        {
+          name: "paint_color",
+          label: "Edge Color",
+          type: "select",
+          options: PAINTED_EDGE_COLORS,
           required: true,
         },
         {
           name: "sides",
           label: "Sides",
           type: "select",
-          options: ["Single Sided", "Double Sided"],
+          options: BC_SIDES,
           required: true,
         },
         {
@@ -266,7 +535,145 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
         },
       ],
     },
-  },
+    "Starting at $54/250"
+  ),
+  premiumProduct(
+    "Fold-over Business Cards",
+    "business-cards-specialty-fold-over",
+    "Fold-over business cards that open to reveal extra space for your message, logo, or offer — MetroPrint USA (MKT1).",
+    {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: BC_QUANTITY,
+          required: true,
+        },
+        {
+          name: "size",
+          label: "Size",
+          type: "select",
+          options: ['2" x 7"', '3.5" x 4"'],
+          required: true,
+        },
+        {
+          name: "finish",
+          label: "Finish",
+          type: "select",
+          options: ["Matte", "UV Gloss", "Soft Touch"],
+          required: true,
+        },
+        {
+          name: "need_design_help",
+          label: "Need Design Help",
+          type: "radio",
+          options: ["Yes", "No"],
+          required: true,
+        },
+      ],
+    },
+    "Starting at $37/100"
+  ),
+  premiumProduct(
+    "Plastic Business Cards",
+    "business-cards-specialty-plastic",
+    "Durable plastic business cards in clear, frosted, or white — choose oval or rounded corners. MetroPrint USA (MKT1).",
+    {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: BC_QUANTITY,
+          required: true,
+        },
+        {
+          name: "size",
+          label: "Size",
+          type: "select",
+          options: ['2" x 3.5"'],
+          required: true,
+        },
+        {
+          name: "shape",
+          label: "Shape",
+          type: "select",
+          options: ["Rounded 4 Corners", "Oval"],
+          required: true,
+        },
+        {
+          name: "plastic_type",
+          label: "Plastic Type",
+          type: "select",
+          options: ["Clear Plastic", "Frosted Plastic", "White Plastic"],
+          required: true,
+        },
+        {
+          name: "colorspec",
+          label: "Color Spec",
+          type: "select",
+          options: ["4/0 (4 color front)", "4/4 (4 color both sides)"],
+          required: true,
+        },
+        {
+          name: "need_design_help",
+          label: "Need Design Help",
+          type: "radio",
+          options: ["Yes", "No"],
+          required: true,
+        },
+      ],
+    },
+    "Starting at $35/100"
+  ),
+  premiumProduct(
+    "Magnetic Business Cards",
+    "business-cards-specialty-magnetic",
+    "Magnetic business cards that stick to fridges, filing cabinets, and metal surfaces — MetroPrint USA (MKT1).",
+    {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: BC_QUANTITY,
+          required: true,
+        },
+        {
+          name: "size",
+          label: "Size",
+          type: "select",
+          options: ['2" x 3.5"'],
+          required: true,
+        },
+        {
+          name: "shape",
+          label: "Shape",
+          type: "select",
+          options: ["Rounded 4 Corners", "Rectangle", "Oval"],
+          required: true,
+        },
+        {
+          name: "corner_radius",
+          label: "Radius of Corners",
+          type: "select",
+          options: ['1/8"', '3/16"', '1/4"', "N/A (Rectangle or Oval)"],
+          required: true,
+        },
+        {
+          name: "need_design_help",
+          label: "Need Design Help",
+          type: "radio",
+          options: ["Yes", "No"],
+          required: true,
+        },
+      ],
+    },
+    "Starting at $40/100"
+  ),
+
+  // Print Materials
   {
     title: "Flyers",
     slug: "flyers",
@@ -750,7 +1157,7 @@ export function getSeedProductsByCategory(category: string) {
 }
 
 export const POPULAR_PRODUCT_SLUGS = [
-  "business-cards",
+  "business-cards-standard",
   "custom-t-shirt-printing",
   "flyers",
   "dtf-transfers",

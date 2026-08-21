@@ -1,0 +1,9 @@
+-- Add lamination option to Metallic Foil and Spot UV business cards
+
+UPDATE products
+SET options_schema = '{"fields":[{"name":"quantity","label":"Quantity","type":"select","options":["25","50","100","250","500","1000","2500"],"required":true},{"name":"size","label":"Size","type":"select","options":["3.5\" x 2\""],"required":true},{"name":"foil_color","label":"Foil Color","type":"select","options":["Gold metallic foil (front)","Silver metallic foil (front)","Gold metallic foil (both sides)","Silver metallic foil (both sides)"],"required":true},{"name":"lamination","label":"Lamination","type":"select","options":["Matte Lamination 2 Sided","Soft Touch Lamination 2 Sided"],"required":true},{"name":"corners","label":"Corners","type":"select","options":["Rectangle","Rounded"],"required":true},{"name":"sides","label":"Sides","type":"select","options":["Single Sided","Double Sided"],"required":true},{"name":"need_design_help","label":"Need Design Help","type":"radio","options":["Yes","No"],"required":true}]}'
+WHERE slug = 'business-cards-premium-metallic-foil-raised';
+
+UPDATE products
+SET options_schema = '{"fields":[{"name":"quantity","label":"Quantity","type":"select","options":["25","50","100","250","500","1000","2500"],"required":true},{"name":"size","label":"Size","type":"select","options":["3.5\" x 2\""],"required":true},{"name":"lamination","label":"Lamination","type":"select","options":["Matte Lamination 2 Sided","Soft Touch Lamination 2 Sided"],"required":true},{"name":"spot_uv","label":"Spot UV","type":"select","options":["One sided","Both sides"],"required":true},{"name":"corners","label":"Corners","type":"select","options":["Rectangle","Rounded"],"required":true},{"name":"sides","label":"Sides","type":"select","options":["Single Sided","Double Sided"],"required":true},{"name":"need_design_help","label":"Need Design Help","type":"radio","options":["Yes","No"],"required":true}]}'
+WHERE slug = 'business-cards-premium-spot-uv-raised';

@@ -4,6 +4,7 @@ export type PaymentStatus = "unpaid" | "pending" | "paid" | "refunded";
 
 export type ProductCategory =
   | "Apparel"
+  | "Business Cards"
   | "Print Materials"
   | "Promotional Products"
   | "DTF Printing"

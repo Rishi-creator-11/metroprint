@@ -4,6 +4,7 @@ import {
   getSeedProductBySlug,
   POPULAR_PRODUCT_SLUGS,
 } from "@/lib/products-data";
+import { CATEGORIES } from "@/lib/constants";
 import { withProductPrice } from "@/lib/product-prices";
 import type { Product } from "@/lib/types";
 
@@ -19,6 +20,17 @@ function mapSeedToProduct(
 }
 
 const FALLBACK_PRODUCTS = SEED_PRODUCTS.map(mapSeedToProduct);
+
+function mergeWithFallback(dbProducts: Product[]): Product[] {
+  const dbSlugs = new Set(dbProducts.map((p) => p.slug));
+  const missing = FALLBACK_PRODUCTS.filter((p) => !dbSlugs.has(p.slug));
+  if (missing.length === 0) return dbProducts;
+
+  return [...dbProducts, ...missing].sort((a, b) => {
+    const cat = a.category.localeCompare(b.category);
+    return cat !== 0 ? cat : a.title.localeCompare(b.title);
+  });
+}
 
 const SUPABASE_TIMEOUT_MS = 3000;
 
@@ -50,12 +62,15 @@ export async function getProducts(): Promise<Product[]> {
     );
 
     if (!result || result.error || !result.data?.length) return FALLBACK_PRODUCTS;
-    return result.data.map((p) =>
+
+    const dbProducts = result.data.map((p) =>
       withProductPrice({
         ...p,
         price: p.price != null ? Number(p.price) : null,
       })
     ) as Product[];
+
+    return mergeWithFallback(dbProducts);
   } catch {
     return FALLBACK_PRODUCTS;
   }
@@ -111,5 +126,14 @@ export async function getPopularProducts(): Promise<Product[]> {
 
 export async function getCategories(): Promise<string[]> {
   const products = await getProducts();
-  return [...new Set(products.map((p) => p.category))];
+  const names = new Set(products.map((p) => p.category));
+  for (const cat of CATEGORIES) {
+    names.add(cat.name);
+  }
+  const order = CATEGORIES.map((c) => c.name);
+  return [...names].sort(
+    (a, b) =>
+      (order.indexOf(a as (typeof order)[number]) + 1 || 99) -
+      (order.indexOf(b as (typeof order)[number]) + 1 || 99)
+  );
 }

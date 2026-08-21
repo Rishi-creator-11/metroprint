@@ -15,11 +15,18 @@ export const CATEGORIES: {
   image: string;
 }[] = [
   {
-    name: "Print Materials",
-    slug: "print-materials",
-    description: "Business cards, flyers, brochures, posters & more",
+    name: "Business Cards",
+    slug: "business-cards",
+    description: "Standard, premium & custom cards — MetroPrint USA MKT1",
     image:
       "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=600&h=400&fit=crop",
+  },
+  {
+    name: "Print Materials",
+    slug: "print-materials",
+    description: "Flyers, brochures, posters & more",
+    image:
+      "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=600&h=400&fit=crop",
   },
   {
     name: "Apparel",
