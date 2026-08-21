@@ -5,6 +5,7 @@ export const SITE_NAME = "MetroPrint USA";
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Products" },
+  { href: "/business-cards", label: "Business Cards" },
   { href: "/contact", label: "Contact" },
 ] as const;
 
@@ -13,13 +14,22 @@ export const CATEGORIES: {
   slug: string;
   description: string;
   image: string;
+  href?: string;
 }[] = [
+  {
+    name: "Business Cards",
+    slug: "business-cards",
+    description: "Standard, premium & specialty business cards",
+    image:
+      "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=600&h=400&fit=crop",
+    href: "/business-cards",
+  },
   {
     name: "Print Materials",
     slug: "print-materials",
-    description: "Business cards, flyers, brochures, posters & more",
+    description: "Flyers, brochures, posters, banners & more",
     image:
-      "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&h=400&fit=crop",
   },
   {
     name: "Apparel",

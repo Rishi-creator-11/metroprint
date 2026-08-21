@@ -739,6 +739,572 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
       ],
     },
   },
+
+  // Business Cards - Standard
+  {
+    title: "Matte Business Cards",
+    slug: "bc-standard-matte",
+    category: "Business Cards",
+    subcategory: "Standard",
+    description:
+      "Classic matte finish business cards with a smooth, non-reflective surface. Professional and elegant for any industry.",
+    base_price_text: "Contact for pricing",
+    image_url: null,
+    active: true,
+    options_schema: {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: ["50", "100", "250", "500", "1000", "2500", "5000"],
+          required: true,
+        },
+        {
+          name: "size",
+          label: "Size",
+          type: "select",
+          options: ['3.5" x 2" (Standard)', '3.5" x 2.5"', '2" x 2" (Square)'],
+          required: true,
+        },
+        {
+          name: "sides",
+          label: "Sides",
+          type: "select",
+          options: ["Single Sided", "Double Sided"],
+          required: true,
+        },
+        {
+          name: "turnaround",
+          label: "Turnaround",
+          type: "select",
+          options: ["Standard (5-7 days)", "Rush (2-3 days)", "Same Day"],
+          required: true,
+        },
+      ],
+    },
+  },
+  {
+    title: "UV Gloss Business Cards",
+    slug: "bc-standard-uv-gloss",
+    category: "Business Cards",
+    subcategory: "Standard",
+    description:
+      "High-shine UV coated business cards that make colors pop. Durable, vibrant, and eye-catching.",
+    base_price_text: "Contact for pricing",
+    image_url: null,
+    active: true,
+    options_schema: {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: ["50", "100", "250", "500", "1000", "2500", "5000"],
+          required: true,
+        },
+        {
+          name: "size",
+          label: "Size",
+          type: "select",
+          options: ['3.5" x 2" (Standard)', '3.5" x 2.5"', '2" x 2" (Square)'],
+          required: true,
+        },
+        {
+          name: "sides",
+          label: "Sides",
+          type: "select",
+          options: ["Single Sided", "Double Sided"],
+          required: true,
+        },
+        {
+          name: "turnaround",
+          label: "Turnaround",
+          type: "select",
+          options: ["Standard (5-7 days)", "Rush (2-3 days)", "Same Day"],
+          required: true,
+        },
+      ],
+    },
+  },
+
+  // Business Cards - Premium
+  {
+    title: "Metallic Foil (Raised) Business Cards",
+    slug: "bc-premium-metallic-foil-raised",
+    category: "Business Cards",
+    subcategory: "Premium",
+    description:
+      "Luxurious raised metallic foil business cards with a tactile, premium feel. Available in gold, silver, copper, and more.",
+    base_price_text: "Contact for pricing",
+    image_url: null,
+    active: true,
+    options_schema: {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: ["50", "100", "250", "500", "1000"],
+          required: true,
+        },
+        {
+          name: "foil_color",
+          label: "Foil Color",
+          type: "select",
+          options: ["Gold", "Silver", "Rose Gold", "Copper", "Holographic"],
+          required: true,
+        },
+        {
+          name: "sides",
+          label: "Sides",
+          type: "select",
+          options: ["Single Sided", "Double Sided"],
+          required: true,
+        },
+        {
+          name: "turnaround",
+          label: "Turnaround",
+          type: "select",
+          options: ["Standard (7-10 days)", "Rush (4-5 days)"],
+          required: true,
+        },
+      ],
+    },
+  },
+  {
+    title: "Kraft Paper Business Cards",
+    slug: "bc-premium-kraft-paper",
+    category: "Business Cards",
+    subcategory: "Premium",
+    description:
+      "Eco-friendly kraft paper business cards with a natural, rustic aesthetic. Perfect for organic brands and artisanal businesses.",
+    base_price_text: "Contact for pricing",
+    image_url: null,
+    active: true,
+    options_schema: {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: ["50", "100", "250", "500", "1000", "2500"],
+          required: true,
+        },
+        {
+          name: "printing",
+          label: "Printing",
+          type: "select",
+          options: ["Full Color", "Black Ink Only", "White Ink"],
+          required: true,
+        },
+        {
+          name: "sides",
+          label: "Sides",
+          type: "select",
+          options: ["Single Sided", "Double Sided"],
+          required: true,
+        },
+        {
+          name: "turnaround",
+          label: "Turnaround",
+          type: "select",
+          options: ["Standard (5-7 days)", "Rush (2-3 days)"],
+          required: true,
+        },
+      ],
+    },
+  },
+  {
+    title: "Durable Business Cards",
+    slug: "bc-premium-durable",
+    category: "Business Cards",
+    subcategory: "Premium",
+    description:
+      "Extra-thick, tear-resistant business cards built to last. Water-resistant coating protects against spills and wear.",
+    base_price_text: "Contact for pricing",
+    image_url: null,
+    active: true,
+    options_schema: {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: ["50", "100", "250", "500", "1000", "2500"],
+          required: true,
+        },
+        {
+          name: "sides",
+          label: "Sides",
+          type: "select",
+          options: ["Single Sided", "Double Sided"],
+          required: true,
+        },
+        {
+          name: "turnaround",
+          label: "Turnaround",
+          type: "select",
+          options: ["Standard (5-7 days)", "Rush (2-3 days)"],
+          required: true,
+        },
+      ],
+    },
+  },
+  {
+    title: "Spot UV (Raised) Business Cards",
+    slug: "bc-premium-spot-uv-raised",
+    category: "Business Cards",
+    subcategory: "Premium",
+    description:
+      "Dramatic contrast between matte and glossy finishes with raised spot UV coating. Creates a striking tactile experience.",
+    base_price_text: "Contact for pricing",
+    image_url: null,
+    active: true,
+    options_schema: {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: ["50", "100", "250", "500", "1000"],
+          required: true,
+        },
+        {
+          name: "sides",
+          label: "Sides",
+          type: "select",
+          options: ["Single Sided", "Double Sided"],
+          required: true,
+        },
+        {
+          name: "turnaround",
+          label: "Turnaround",
+          type: "select",
+          options: ["Standard (7-10 days)", "Rush (4-5 days)"],
+          required: true,
+        },
+      ],
+    },
+  },
+  {
+    title: "Pearl Paper Business Cards",
+    slug: "bc-premium-pearl-paper",
+    category: "Business Cards",
+    subcategory: "Premium",
+    description:
+      "Shimmering pearl finish business cards with an iridescent sheen. Adds subtle elegance to any design.",
+    base_price_text: "Contact for pricing",
+    image_url: null,
+    active: true,
+    options_schema: {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: ["50", "100", "250", "500", "1000", "2500"],
+          required: true,
+        },
+        {
+          name: "sides",
+          label: "Sides",
+          type: "select",
+          options: ["Single Sided", "Double Sided"],
+          required: true,
+        },
+        {
+          name: "turnaround",
+          label: "Turnaround",
+          type: "select",
+          options: ["Standard (5-7 days)", "Rush (2-3 days)"],
+          required: true,
+        },
+      ],
+    },
+  },
+  {
+    title: "Die Cut Business Cards",
+    slug: "bc-premium-die-cut",
+    category: "Business Cards",
+    subcategory: "Premium",
+    description:
+      "Custom-shaped business cards cut to your unique design. Stand out with rounded corners, circles, or completely custom shapes.",
+    base_price_text: "Contact for pricing",
+    image_url: null,
+    active: true,
+    options_schema: {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: ["100", "250", "500", "1000"],
+          required: true,
+        },
+        {
+          name: "shape",
+          label: "Shape",
+          type: "select",
+          options: ["Rounded Corners", "Circle", "Half Circle", "Leaf", "Custom Shape"],
+          required: true,
+        },
+        {
+          name: "finish",
+          label: "Finish",
+          type: "select",
+          options: ["Matte", "Gloss", "Soft Touch"],
+          required: true,
+        },
+        {
+          name: "turnaround",
+          label: "Turnaround",
+          type: "select",
+          options: ["Standard (7-10 days)", "Rush (4-5 days)"],
+          required: true,
+        },
+      ],
+    },
+  },
+  {
+    title: "Soft Touch (Suede) Business Cards",
+    slug: "bc-premium-soft-touch-suede",
+    category: "Business Cards",
+    subcategory: "Premium",
+    description:
+      "Velvety soft-touch laminated business cards with a luxurious suede-like texture. Unforgettable to hold.",
+    base_price_text: "Contact for pricing",
+    image_url: null,
+    active: true,
+    options_schema: {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: ["50", "100", "250", "500", "1000", "2500"],
+          required: true,
+        },
+        {
+          name: "sides",
+          label: "Sides",
+          type: "select",
+          options: ["Single Sided", "Double Sided"],
+          required: true,
+        },
+        {
+          name: "turnaround",
+          label: "Turnaround",
+          type: "select",
+          options: ["Standard (5-7 days)", "Rush (2-3 days)"],
+          required: true,
+        },
+      ],
+    },
+  },
+  {
+    title: "32pt Painted Edge Business Cards",
+    slug: "bc-premium-32pt-painted-edge",
+    category: "Business Cards",
+    subcategory: "Premium",
+    description:
+      "Ultra-thick 32pt cardstock with vibrant painted edges. A bold statement of quality with color on every side.",
+    base_price_text: "Contact for pricing",
+    image_url: null,
+    active: true,
+    options_schema: {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: ["50", "100", "250", "500", "1000"],
+          required: true,
+        },
+        {
+          name: "edge_color",
+          label: "Edge Color",
+          type: "select",
+          options: ["Gold", "Silver", "Red", "Blue", "Black", "Green", "Custom"],
+          required: true,
+        },
+        {
+          name: "sides",
+          label: "Sides",
+          type: "select",
+          options: ["Single Sided", "Double Sided"],
+          required: true,
+        },
+        {
+          name: "turnaround",
+          label: "Turnaround",
+          type: "select",
+          options: ["Standard (7-10 days)", "Rush (4-5 days)"],
+          required: true,
+        },
+      ],
+    },
+  },
+  {
+    title: "Ultra Smooth Business Cards",
+    slug: "bc-premium-ultra-smooth",
+    category: "Business Cards",
+    subcategory: "Premium",
+    description:
+      "Premium uncoated ultra-smooth cardstock for a clean, modern look. Ideal for minimalist and high-end designs.",
+    base_price_text: "Contact for pricing",
+    image_url: null,
+    active: true,
+    options_schema: {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: ["50", "100", "250", "500", "1000", "2500"],
+          required: true,
+        },
+        {
+          name: "sides",
+          label: "Sides",
+          type: "select",
+          options: ["Single Sided", "Double Sided"],
+          required: true,
+        },
+        {
+          name: "turnaround",
+          label: "Turnaround",
+          type: "select",
+          options: ["Standard (5-7 days)", "Rush (2-3 days)"],
+          required: true,
+        },
+      ],
+    },
+  },
+
+  // Business Cards - Specialty
+  {
+    title: "Fold Over Business Cards",
+    slug: "bc-specialty-fold-over",
+    category: "Business Cards",
+    subcategory: "Specialty",
+    description:
+      "Double-sized cards that fold to standard size, giving you twice the space for information, menus, or appointment details.",
+    base_price_text: "Contact for pricing",
+    image_url: null,
+    active: true,
+    options_schema: {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: ["50", "100", "250", "500", "1000"],
+          required: true,
+        },
+        {
+          name: "fold",
+          label: "Fold Direction",
+          type: "select",
+          options: ["Horizontal", "Vertical"],
+          required: true,
+        },
+        {
+          name: "finish",
+          label: "Finish",
+          type: "select",
+          options: ["Matte", "Gloss", "Soft Touch"],
+          required: true,
+        },
+        {
+          name: "turnaround",
+          label: "Turnaround",
+          type: "select",
+          options: ["Standard (7-10 days)", "Rush (4-5 days)"],
+          required: true,
+        },
+      ],
+    },
+  },
+  {
+    title: "Plastic Business Cards",
+    slug: "bc-specialty-plastic",
+    category: "Business Cards",
+    subcategory: "Specialty",
+    description:
+      "Transparent or frosted plastic business cards that are waterproof and virtually indestructible. A modern, futuristic look.",
+    base_price_text: "Contact for pricing",
+    image_url: null,
+    active: true,
+    options_schema: {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: ["50", "100", "250", "500", "1000"],
+          required: true,
+        },
+        {
+          name: "material",
+          label: "Material",
+          type: "select",
+          options: ["Clear Plastic", "Frosted Plastic", "White Plastic", "Black Plastic"],
+          required: true,
+        },
+        {
+          name: "sides",
+          label: "Sides",
+          type: "select",
+          options: ["Single Sided", "Double Sided"],
+          required: true,
+        },
+        {
+          name: "turnaround",
+          label: "Turnaround",
+          type: "select",
+          options: ["Standard (10-14 days)", "Rush (5-7 days)"],
+          required: true,
+        },
+      ],
+    },
+  },
+  {
+    title: "Magnetic Business Cards",
+    slug: "bc-specialty-magnetic",
+    category: "Business Cards",
+    subcategory: "Specialty",
+    description:
+      "Business cards with a magnetic backing that stick to fridges, filing cabinets, and metal surfaces. Your brand stays visible.",
+    base_price_text: "Contact for pricing",
+    image_url: null,
+    active: true,
+    options_schema: {
+      fields: [
+        {
+          name: "quantity",
+          label: "Quantity",
+          type: "select",
+          options: ["50", "100", "250", "500", "1000", "2500"],
+          required: true,
+        },
+        {
+          name: "finish",
+          label: "Finish",
+          type: "select",
+          options: ["Gloss", "Matte"],
+          required: true,
+        },
+        {
+          name: "turnaround",
+          label: "Turnaround",
+          type: "select",
+          options: ["Standard (7-10 days)", "Rush (4-5 days)"],
+          required: true,
+        },
+      ],
+    },
+  },
 ];
 
 export function getSeedProductBySlug(slug: string) {
@@ -750,7 +1316,7 @@ export function getSeedProductsByCategory(category: string) {
 }
 
 export const POPULAR_PRODUCT_SLUGS = [
-  "business-cards",
+  "bc-standard-matte",
   "custom-t-shirt-printing",
   "flyers",
   "dtf-transfers",

@@ -113,3 +113,43 @@ export async function getCategories(): Promise<string[]> {
   const products = await getProducts();
   return [...new Set(products.map((p) => p.category))];
 }
+
+export async function getBusinessCardsBySubcategory(
+  subcategory: string
+): Promise<Product[]> {
+  if (!isSupabaseConfigured()) {
+    return FALLBACK_PRODUCTS.filter(
+      (p) => p.category === "Business Cards" && p.subcategory === subcategory
+    );
+  }
+
+  try {
+    const supabase = await createClient();
+    const result = await withTimeout(
+      supabase
+        .from("products")
+        .select("*")
+        .eq("active", true)
+        .eq("category", "Business Cards")
+        .eq("subcategory", subcategory)
+        .order("title"),
+      SUPABASE_TIMEOUT_MS
+    );
+
+    if (!result || result.error || !result.data?.length) {
+      return FALLBACK_PRODUCTS.filter(
+        (p) => p.category === "Business Cards" && p.subcategory === subcategory
+      );
+    }
+    return result.data.map((p) =>
+      withProductPrice({
+        ...p,
+        price: p.price != null ? Number(p.price) : null,
+      })
+    ) as Product[];
+  } catch {
+    return FALLBACK_PRODUCTS.filter(
+      (p) => p.category === "Business Cards" && p.subcategory === subcategory
+    );
+  }
+}
