@@ -46,20 +46,26 @@ export default async function ProductsPage({
           >
             All
           </Link>
-          {categories.map((cat) => (
-            <Link
-              key={cat}
-              href={`/products?category=${encodeURIComponent(cat)}`}
-              className={cn(
-                "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                category === cat
-                  ? "bg-primary text-white"
-                  : "bg-surface text-muted hover:bg-slate-200"
-              )}
-            >
-              {cat}
-            </Link>
-          ))}
+          {categories.map((cat) => {
+            const isBusinessCards = cat === "Business Cards";
+            const href = isBusinessCards
+              ? "/business-cards"
+              : `/products?category=${encodeURIComponent(cat)}`;
+            return (
+              <Link
+                key={cat}
+                href={href}
+                className={cn(
+                  "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                  category === cat
+                    ? "bg-primary text-white"
+                    : "bg-surface text-muted hover:bg-slate-200"
+                )}
+              >
+                {cat}
+              </Link>
+            );
+          })}
         </div>
 
         {filtered.length === 0 ? (

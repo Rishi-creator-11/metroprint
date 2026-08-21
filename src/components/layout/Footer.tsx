@@ -54,6 +54,11 @@ export function Footer() {
             </h3>
             <ul className="space-y-2 text-sm text-white/70">
               <li>
+                <Link href="/business-cards" className="hover:text-accent">
+                  Business Cards
+                </Link>
+              </li>
+              <li>
                 <Link
                   href="/products?category=Print+Materials"
                   className="hover:text-accent"

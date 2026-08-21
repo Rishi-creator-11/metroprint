@@ -1050,13 +1050,6 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
           required: true,
         },
         {
-          name: "finish",
-          label: "Finish",
-          type: "select",
-          options: ["Matte", "Gloss", "Soft Touch"],
-          required: true,
-        },
-        {
           name: "turnaround",
           label: "Turnaround",
           type: "select",
@@ -1210,13 +1203,6 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
           required: true,
         },
         {
-          name: "finish",
-          label: "Finish",
-          type: "select",
-          options: ["Matte", "Gloss", "Soft Touch"],
-          required: true,
-        },
-        {
           name: "turnaround",
           label: "Turnaround",
           type: "select",
@@ -1286,13 +1272,6 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
           label: "Quantity",
           type: "select",
           options: ["50", "100", "250", "500", "1000", "2500"],
-          required: true,
-        },
-        {
-          name: "finish",
-          label: "Finish",
-          type: "select",
-          options: ["Gloss", "Matte"],
           required: true,
         },
         {
