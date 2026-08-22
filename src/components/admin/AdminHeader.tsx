@@ -27,9 +27,9 @@ export function AdminHeader() {
         <div className="flex items-center gap-4">
           <Link
             href="/admin/prices"
-            className="text-sm text-muted hover:text-primary"
+            className="rounded-lg bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/15"
           >
-            Prices
+            Pricing
           </Link>
           <Link
             href="/admin/dashboard"

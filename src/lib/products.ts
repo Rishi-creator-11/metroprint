@@ -6,6 +6,7 @@ import {
 } from "@/lib/products-data";
 import { CATEGORIES } from "@/lib/constants";
 import { withProductPrice } from "@/lib/product-prices";
+import { normalizePricingRules } from "@/lib/pricing";
 import type { Product } from "@/lib/types";
 
 const BUSINESS_CARD_IMAGES: Record<string, string> = {
@@ -21,24 +22,38 @@ const BUSINESS_CARD_IMAGES: Record<string, string> = {
   "business-cards-specialty-magnetic": "https://images.pexels.com/photos/15569097/pexels-photo-15569097.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
 };
 
+function enrichBusinessCardFromSeed<
+  T extends {
+    slug: string;
+    category: string;
+    options_schema?: Product["options_schema"];
+    subcategory?: string | null;
+    title?: string;
+    description?: string;
+    base_price_text?: string;
+  },
+>(row: T): T {
+  if (!row.slug.startsWith("business-cards-")) return row;
+  const seed = getSeedProductBySlug(row.slug);
+  if (!seed) return row;
+  return {
+    ...row,
+    title: seed.title,
+    description: seed.description,
+    base_price_text: seed.base_price_text,
+    options_schema: seed.options_schema,
+    subcategory: seed.subcategory ?? row.subcategory,
+  };
+}
+
 function mapSeedToProduct(
   seed: (typeof SEED_PRODUCTS)[number],
   index: number
 ): Product {
-  const optionsSchema =
-    seed.category === "Business Cards"
-      ? {
-          ...seed.options_schema,
-          fields: seed.options_schema.fields.filter(
-            (field) => !["stock", "finish"].includes(field.name)
-          ),
-        }
-      : seed.options_schema;
-
   return withProductPrice({
     ...seed,
     image_url: BUSINESS_CARD_IMAGES[seed.slug] ?? seed.image_url,
-    options_schema: optionsSchema,
+    pricing_rules: null,
     id: `seed-${index}`,
     created_at: new Date().toISOString(),
   }) as Product;
@@ -89,10 +104,13 @@ export async function getProducts(): Promise<Product[]> {
     if (!result || result.error || !result.data?.length) return FALLBACK_PRODUCTS;
 
     const dbProducts = result.data.map((p) =>
-      withProductPrice({
-        ...p,
-        price: p.price != null ? Number(p.price) : null,
-      })
+      withProductPrice(
+        enrichBusinessCardFromSeed({
+          ...p,
+          price: p.price != null ? Number(p.price) : null,
+          pricing_rules: normalizePricingRules(p.pricing_rules),
+        })
+      )
     ) as Product[];
 
     return mergeWithFallback(dbProducts);
@@ -126,10 +144,13 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     );
 
     if (!result || result.error || !result.data) return seedFallback();
-    return withProductPrice({
-      ...result.data,
-      price: result.data.price != null ? Number(result.data.price) : null,
-    }) as Product;
+    return withProductPrice(
+      enrichBusinessCardFromSeed({
+        ...result.data,
+        price: result.data.price != null ? Number(result.data.price) : null,
+        pricing_rules: normalizePricingRules(result.data.pricing_rules),
+      })
+    ) as Product;
   } catch {
     return seedFallback();
   }
@@ -191,10 +212,13 @@ export async function getBusinessCardsBySubcategory(
       );
     }
     return result.data.map((p) =>
-      withProductPrice({
-        ...p,
-        price: p.price != null ? Number(p.price) : null,
-      })
+      withProductPrice(
+        enrichBusinessCardFromSeed({
+          ...p,
+          price: p.price != null ? Number(p.price) : null,
+          pricing_rules: normalizePricingRules(p.pricing_rules),
+        })
+      )
     ) as Product[];
   } catch {
     return FALLBACK_PRODUCTS.filter(

@@ -1,7 +1,7 @@
 import SiteLayout from "@/components/layout/SiteLayout";
 import { ProductAddToCart } from "@/components/products/ProductAddToCart";
 import { getProductBySlug } from "@/lib/products";
-import { formatPrice } from "@/lib/product-prices";
+import { formatPrice, getProductDisplayPrice } from "@/lib/product-prices";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
@@ -37,6 +37,12 @@ export default async function BusinessCardProductPage({
 
   if (!product) notFound();
 
+  const displayPrice = getProductDisplayPrice(
+    product.slug,
+    product.price,
+    product.pricing_rules,
+    { category: product.category, optionsSchema: product.options_schema }
+  );
   const groupLabel = GROUP_LABELS[group] ?? "Business Cards";
 
   return (
@@ -66,9 +72,9 @@ export default async function BusinessCardProductPage({
             <h1 className="mt-2 text-3xl font-bold text-navy">
               {product.title}
             </h1>
-            {product.price > 0 && (
+            {displayPrice > 0 && (
               <p className="mt-3 text-3xl font-bold text-primary">
-                {formatPrice(product.price)}
+                From {formatPrice(displayPrice)}
               </p>
             )}
             {product.base_price_text &&

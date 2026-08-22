@@ -5,10 +5,10 @@ import { generateOrderNumber } from "@/lib/order-utils";
 import { collectArtworkUrls } from "@/lib/artwork";
 import {
   getProductPrice,
-  getCartLineTotal,
-  parseQuantityFromOptions,
 } from "@/lib/product-prices";
-import type { CartItem } from "@/lib/types";
+import { calculateLinePrice, normalizePricingRules } from "@/lib/pricing";
+import { getSeedProductBySlug } from "@/lib/products-data";
+import type { CartItem, OptionsSchema } from "@/lib/types";
 
 export async function POST(request: Request) {
   try {
@@ -33,27 +33,64 @@ export async function POST(request: Request) {
     const service = await createServiceClient();
 
     const slugs = [...new Set(items.map((item) => item.product_slug))];
-    const { data: dbProducts } = await service
+    let { data: dbProducts, error: productsError } = await service
       .from("products")
-      .select("slug, price")
+      .select("slug, price, pricing_rules, category, options_schema")
       .in("slug", slugs);
 
-    const priceBySlug: Record<string, number | null> = {};
+    if (productsError?.message?.includes("pricing_rules")) {
+      const fallback = await service
+        .from("products")
+        .select("slug, price, category, options_schema")
+        .in("slug", slugs);
+      dbProducts =
+        fallback.data?.map((row) => ({ ...row, pricing_rules: null })) ?? null;
+    }
+
+    const productBySlug: Record<
+      string,
+      {
+        price: number | null;
+        pricing_rules: ReturnType<typeof normalizePricingRules>;
+        category: string;
+        options_schema: OptionsSchema;
+      }
+    > = {};
     for (const row of dbProducts || []) {
-      priceBySlug[row.slug] =
-        row.price != null ? Number(row.price) : null;
+      const seed = getSeedProductBySlug(row.slug);
+      const options_schema = (row.slug.startsWith("business-cards-") && seed
+        ? seed.options_schema
+        : row.options_schema ?? seed?.options_schema ?? { fields: [] }) as OptionsSchema;
+
+      productBySlug[row.slug] = {
+        price: row.price != null ? Number(row.price) : null,
+        pricing_rules: normalizePricingRules(
+          "pricing_rules" in row ? row.pricing_rules : null
+        ),
+        category: row.category ?? seed?.category ?? "",
+        options_schema,
+      };
     }
 
     const validatedItems = items.map((item) => {
-      const dbPrice = priceBySlug[item.product_slug];
-      const unitPrice = getProductPrice(item.product_slug, dbPrice);
-      const quantity = parseQuantityFromOptions(item.selected_options);
-      const lineTotal = getCartLineTotal(unitPrice, quantity);
+      const db = productBySlug[item.product_slug];
+      const basePrice = getProductPrice(item.product_slug, db?.price);
+      const result = calculateLinePrice(
+        basePrice,
+        db?.pricing_rules,
+        item.selected_options || {},
+        {
+          slug: item.product_slug,
+          category: db?.category ?? item.category,
+          optionsSchema: db?.options_schema,
+        }
+      );
       return {
         ...item,
-        unit_price: unitPrice,
-        quantity,
-        line_total: lineTotal,
+        unit_price: result.unitPrice,
+        quantity: result.orderQuantity,
+        line_total: result.lineTotal,
+        is_tier_pricing: result.isTierPricing,
       };
     });
 
@@ -113,8 +150,8 @@ export async function POST(request: Request) {
       orderNumber,
       items: validatedItems.map((item) => ({
         title: item.product_title,
-        unitAmountCents: Math.round(item.unit_price * 100),
-        quantity: item.quantity,
+        unitAmountCents: Math.round(item.line_total * 100),
+        quantity: 1,
       })),
       metadata: {
         order_id: order.id,

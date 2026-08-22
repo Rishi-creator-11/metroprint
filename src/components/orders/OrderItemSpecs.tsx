@@ -84,10 +84,18 @@ export function OrderItemSpecs({
       )}
 
       <p className="mt-3 text-sm text-muted">
-        {formatPrice(item.unit_price)} × {item.quantity}
-        <span className="ml-2 font-semibold text-navy">
-          = {formatPrice(item.line_total || item.unit_price * item.quantity)}
-        </span>
+        {item.is_tier_pricing ? (
+          <span className="font-semibold text-navy">
+            {formatPrice(item.line_total || item.unit_price)}
+          </span>
+        ) : (
+          <>
+            {formatPrice(item.unit_price)} × {item.quantity}
+            <span className="ml-2 font-semibold text-navy">
+              = {formatPrice(item.line_total || item.unit_price * item.quantity)}
+            </span>
+          </>
+        )}
       </p>
 
       {item.artwork_files && item.artwork_files.length > 0 && (

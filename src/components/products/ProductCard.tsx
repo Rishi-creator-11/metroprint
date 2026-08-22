@@ -1,10 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
-import { formatPrice } from "@/lib/product-prices";
+import { formatPrice, getProductDisplayPrice } from "@/lib/product-prices";
 import type { Product } from "@/lib/types";
 
 export function ProductCard({ product, href }: { product: Product; href?: string }) {
   const resolvedHref = href ?? `/products/${product.slug}`;
+  const displayPrice = getProductDisplayPrice(
+    product.slug,
+    product.price,
+    product.pricing_rules,
+    { category: product.category, optionsSchema: product.options_schema }
+  );
 
   return (
     <Link
@@ -38,9 +44,9 @@ export function ProductCard({ product, href }: { product: Product; href?: string
         <p className="mt-1 line-clamp-2 text-sm text-muted">
           {product.description}
         </p>
-        {product.price > 0 ? (
+        {displayPrice > 0 ? (
           <p className="mt-auto pt-3 text-base font-bold text-primary">
-            {formatPrice(product.price)}
+            From {formatPrice(displayPrice)}
           </p>
         ) : (
           <p className="mt-auto pt-3 text-sm font-medium text-muted">

@@ -1,7 +1,7 @@
 import SiteLayout from "@/components/layout/SiteLayout";
 import { ProductAddToCart } from "@/components/products/ProductAddToCart";
 import { getProductBySlug } from "@/lib/products";
-import { formatPrice } from "@/lib/product-prices";
+import { formatPrice, getProductDisplayPrice } from "@/lib/product-prices";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
@@ -29,6 +29,13 @@ export default async function ProductDetailPage({
 
   if (!product) notFound();
 
+  const displayPrice = getProductDisplayPrice(
+    product.slug,
+    product.price,
+    product.pricing_rules,
+    { category: product.category, optionsSchema: product.options_schema }
+  );
+
   return (
     <SiteLayout>
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -38,8 +45,11 @@ export default async function ProductDetailPage({
               {product.category}
             </p>
             <h1 className="mt-2 text-3xl font-bold text-navy">{product.title}</h1>
-            <p className="mt-3 text-3xl font-bold text-primary">
-              {formatPrice(product.price)}
+            <p className="mt-3 text-sm font-medium uppercase tracking-wide text-muted">
+              From
+            </p>
+            <p className="text-3xl font-bold text-primary">
+              {formatPrice(displayPrice)}
             </p>
             <p className="mt-4 text-muted">{product.description}</p>
 

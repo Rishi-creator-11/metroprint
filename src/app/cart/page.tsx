@@ -88,7 +88,7 @@ export default function CartPage() {
                       )}
                       <p className="mt-3 font-semibold text-navy">
                         {formatPrice(item.line_total || item.unit_price)}
-                        {item.quantity > 1 && (
+                        {!item.is_tier_pricing && item.quantity > 1 && (
                           <span className="ml-2 text-sm font-normal text-muted">
                             ({formatPrice(item.unit_price)} × {item.quantity})
                           </span>

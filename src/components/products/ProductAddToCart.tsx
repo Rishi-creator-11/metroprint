@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ShoppingCart, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ArtworkUpload } from "@/components/products/ArtworkUpload";
 import { useCart } from "@/components/cart/CartProvider";
 import {
   formatPrice,
-  getCartLineTotal,
-  parseQuantityFromOptions,
+  getProductDisplayPrice,
 } from "@/lib/product-prices";
+import { calculateLinePrice } from "@/lib/pricing";
 import type { ArtworkFile } from "@/lib/artwork";
 import type { Product, OptionField } from "@/lib/types";
 
@@ -96,8 +96,31 @@ export function ProductAddToCart({ product }: { product: Product }) {
   const [error, setError] = useState("");
   const [added, setAdded] = useState(false);
 
-  const quantity = parseQuantityFromOptions(options);
-  const lineTotal = getCartLineTotal(product.price, quantity);
+  const priceResult = useMemo(
+    () =>
+      calculateLinePrice(product.price, product.pricing_rules, options, {
+        slug: product.slug,
+        category: product.category,
+        optionsSchema: product.options_schema,
+      }),
+    [
+      product.price,
+      product.pricing_rules,
+      product.slug,
+      product.category,
+      product.options_schema,
+      options,
+    ]
+  );
+
+  const displayFrom = getProductDisplayPrice(
+    product.slug,
+    product.price,
+    product.pricing_rules,
+    { category: product.category, optionsSchema: product.options_schema }
+  );
+
+  const hasSelection = Object.values(options).some(Boolean);
 
   const handleAdd = () => {
     const required = product.options_schema.fields.filter((f) => f.required);
@@ -118,9 +141,10 @@ export function ProductAddToCart({ product }: { product: Product }) {
       product_title: product.title,
       category: product.category,
       selected_options: options,
-      unit_price: product.price,
-      quantity,
-      line_total: lineTotal,
+      unit_price: priceResult.unitPrice,
+      quantity: priceResult.orderQuantity,
+      line_total: priceResult.lineTotal,
+      is_tier_pricing: priceResult.isTierPricing,
       image_url: product.image_url,
       artwork_files: artworkFiles,
     });
@@ -135,7 +159,22 @@ export function ProductAddToCart({ product }: { product: Product }) {
     <div className="rounded-xl border border-border bg-white p-6 shadow-sm sm:p-8">
       <div className="mb-6 flex items-baseline justify-between gap-4">
         <h2 className="text-xl font-semibold text-navy">Configure & Add</h2>
-        <p className="text-2xl font-bold text-primary">{formatPrice(product.price)}</p>
+        <div className="text-right">
+          {hasSelection ? (
+            <p className="text-2xl font-bold text-primary">
+              {formatPrice(priceResult.lineTotal)}
+            </p>
+          ) : (
+            <>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted">
+                From
+              </p>
+              <p className="text-2xl font-bold text-primary">
+                {formatPrice(displayFrom)}
+              </p>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -164,10 +203,30 @@ export function ProductAddToCart({ product }: { product: Product }) {
         />
       </div>
 
-      {quantity > 1 && (
+      {hasSelection && (
         <p className="mt-4 text-sm text-muted">
-          Estimated line total:{" "}
-          <span className="font-semibold text-navy">{formatPrice(lineTotal)}</span>
+          {priceResult.isTierPricing ? (
+            <>
+              Total for{" "}
+              <span className="font-semibold text-navy">
+                {options.quantity || priceResult.orderQuantity} units
+              </span>
+              :{" "}
+              <span className="font-semibold text-navy">
+                {formatPrice(priceResult.lineTotal)}
+              </span>
+            </>
+          ) : priceResult.orderQuantity > 1 ? (
+            <>
+              Estimated total:{" "}
+              <span className="font-semibold text-navy">
+                {formatPrice(priceResult.lineTotal)}
+              </span>
+              <span className="ml-1">
+                ({formatPrice(priceResult.unitPrice)} × {priceResult.orderQuantity})
+              </span>
+            </>
+          ) : null}
         </p>
       )}
 

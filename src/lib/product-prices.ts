@@ -1,4 +1,10 @@
-/** Default unit prices (USD) — update anytime in admin/DB later */
+import { getStartingPrice as getStartingFromRules } from "@/lib/pricing";
+import {
+  getLowestQuantityPrice,
+  resolveOptionPrices,
+  usesBusinessCardPricing,
+} from "@/lib/business-card-pricing-defaults";
+import type { OptionsSchema, ProductPricingRules } from "@/lib/types";
 export const PRODUCT_PRICES: Record<string, number> = {
   "custom-t-shirt-printing": 18.99,
   "custom-polo-printing": 24.99,
@@ -43,13 +49,36 @@ export function formatPriceLabel(amount: number): string {
   return `Starting at ${formatPrice(amount)}`;
 }
 
-export function withProductPrice<T extends { slug: string; price?: number | null }>(
-  product: T
-): T & { price: number } {
+export function withProductPrice<
+  T extends {
+    slug: string;
+    price?: number | null;
+    pricing_rules?: ProductPricingRules | null;
+  },
+>(product: T): T & { price: number } {
   return {
     ...product,
     price: getProductPrice(product.slug, product.price),
   };
+}
+
+export function getProductDisplayPrice(
+  slug: string,
+  dbPrice: number | null | undefined,
+  pricingRules?: ProductPricingRules | null,
+  context?: { category?: string; optionsSchema?: OptionsSchema }
+): number {
+  const base = getProductPrice(slug, dbPrice);
+  if (usesBusinessCardPricing(context?.category, context?.optionsSchema)) {
+    const rules = resolveOptionPrices(
+      base,
+      context!.optionsSchema!,
+      pricingRules
+    );
+    const lowest = getLowestQuantityPrice(rules);
+    return lowest ?? base;
+  }
+  return getStartingFromRules(base, pricingRules);
 }
 
 export function formatPrice(amount: number): string {

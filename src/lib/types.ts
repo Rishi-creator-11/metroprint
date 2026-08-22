@@ -23,6 +23,11 @@ export interface OptionsSchema {
   fields: OptionField[];
 }
 
+/** Every option value has its own price (quantity = order total, others = add-on). */
+export interface ProductPricingRules {
+  option_prices?: Record<string, Record<string, number>>;
+}
+
 export interface Product {
   id: string;
   title: string;
@@ -34,6 +39,7 @@ export interface Product {
   price: number;
   image_url: string | null;
   options_schema: OptionsSchema;
+  pricing_rules?: ProductPricingRules | null;
   active: boolean;
   created_at: string;
 }
@@ -47,6 +53,7 @@ export interface CartItem {
   unit_price: number;
   quantity: number;
   line_total: number;
+  is_tier_pricing?: boolean;
   image_url?: string | null;
   artwork_files?: { name: string; url: string }[];
 }
