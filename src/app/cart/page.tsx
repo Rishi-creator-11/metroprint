@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Trash2, ShoppingBag, ArrowRight, Loader2 } from "lucide-react";
 import SiteLayout from "@/components/layout/SiteLayout";
 import { Button } from "@/components/ui/Button";

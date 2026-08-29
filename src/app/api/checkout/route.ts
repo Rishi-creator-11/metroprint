@@ -8,6 +8,7 @@ import {
 } from "@/lib/product-prices";
 import { calculateLinePrice, normalizePricingRules } from "@/lib/pricing";
 import { getSeedProductBySlug } from "@/lib/products-data";
+import { isOptionPricingSlug } from "@/lib/admin-pricing-catalog";
 import type { CartItem, OptionsSchema } from "@/lib/types";
 
 export async function POST(request: Request) {
@@ -30,13 +31,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
+    const hasCustomOrder = items.some((item) =>
+      item.selected_options?.quantity?.trim() === "Custom order"
+    );
+    if (hasCustomOrder) {
+      return NextResponse.json(
+        {
+          error:
+            "Custom quantity orders require a quote. Remove them from your cart or request a quote instead.",
+        },
+        { status: 400 }
+      );
+    }
+
     const service = await createServiceClient();
 
     const slugs = [...new Set(items.map((item) => item.product_slug))];
-    let { data: dbProducts, error: productsError } = await service
+    const { data: initialDbProducts, error: productsError } = await service
       .from("products")
       .select("slug, price, pricing_rules, category, options_schema")
       .in("slug", slugs);
+    let dbProducts = initialDbProducts;
 
     if (productsError?.message?.includes("pricing_rules")) {
       const fallback = await service
@@ -58,7 +73,7 @@ export async function POST(request: Request) {
     > = {};
     for (const row of dbProducts || []) {
       const seed = getSeedProductBySlug(row.slug);
-      const options_schema = (row.slug.startsWith("business-cards-") && seed
+      const options_schema = (isOptionPricingSlug(row.slug) && seed
         ? seed.options_schema
         : row.options_schema ?? seed?.options_schema ?? { fields: [] }) as OptionsSchema;
 

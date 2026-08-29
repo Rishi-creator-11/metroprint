@@ -2,11 +2,12 @@ import { getStartingPrice as getStartingFromRules } from "@/lib/pricing";
 import {
   getLowestQuantityPrice,
   resolveOptionPrices,
-  usesBusinessCardPricing,
+  usesOptionPricing,
 } from "@/lib/business-card-pricing-defaults";
 import type { OptionsSchema, ProductPricingRules } from "@/lib/types";
 export const PRODUCT_PRICES: Record<string, number> = {
   "custom-t-shirt-printing": 18.99,
+  "custom-long-sleeve-t-shirt-printing": 24.99,
   "custom-polo-printing": 24.99,
   "custom-hoodie-printing": 34.99,
   "custom-hats": 14.99,
@@ -22,12 +23,14 @@ export const PRODUCT_PRICES: Record<string, number> = {
   "business-cards-specialty-plastic": 34.99,
   "business-cards-specialty-magnetic": 39.99,
   flyers: 49.99,
+  postcards: 39.99,
   brochures: 89.99,
   posters: 19.99,
   "door-hangers": 59.99,
   bookmarks: 39.99,
   folders: 99.99,
   "roll-up-banners": 89.99,
+  "car-door-magnets": 49.99,
   "custom-mugs": 11.99,
   "custom-tumblers": 16.99,
   "branded-merchandise": 149.99,
@@ -69,7 +72,7 @@ export function getProductDisplayPrice(
   context?: { category?: string; optionsSchema?: OptionsSchema }
 ): number {
   const base = getProductPrice(slug, dbPrice);
-  if (usesBusinessCardPricing(context?.category, context?.optionsSchema)) {
+  if (usesOptionPricing(slug, context?.category, context?.optionsSchema)) {
     const rules = resolveOptionPrices(
       base,
       context!.optionsSchema!,

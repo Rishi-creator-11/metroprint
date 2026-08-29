@@ -1,4 +1,20 @@
 import type { Product, OptionsSchema } from "./types";
+import { BUSINESS_CARD_QUANTITY_OPTIONS } from "./business-card-quantities";
+import { flyerOptionsSchema } from "./flyer-options";
+import { postcardOptionsSchema } from "./postcard-options";
+import { brochureOptionsSchema } from "./brochure-options";
+import { bookmarkOptionsSchema } from "./bookmark-options";
+import { doorHangerOptionsSchema } from "./door-hanger-options";
+import { folderOptionsSchema } from "./folder-options";
+import { posterOptionsSchema } from "./poster-options";
+import { rollUpBannerOptionsSchema } from "./roll-up-banner-options";
+import { carDoorMagnetOptionsSchema } from "./car-door-magnet-options";
+import {
+  apparelPrintingOptionsSchema,
+  APPAREL_QUANTITY_OPTIONS,
+  BASIC_APPAREL_COLORS,
+} from "./apparel-options";
+import { withDesignHelpField } from "./product-options-shared";
 
 const BUSINESS_CARD_IMAGE =
   "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=800&h=600&fit=crop";
@@ -9,7 +25,7 @@ const standardBusinessCardOptions: OptionsSchema = {
       name: "quantity",
       label: "Quantity",
       type: "select",
-      options: ["50", "100", "250", "500", "1000", "2500", "5000"],
+      options: [...BUSINESS_CARD_QUANTITY_OPTIONS],
       required: true,
     },
     {
@@ -51,7 +67,7 @@ const standardBusinessCardOptions: OptionsSchema = {
 };
 
 const BC_SIZE = ['3.5" x 2"'];
-const BC_QUANTITY = ["25", "50", "100", "250", "500", "1000", "2500"];
+const BC_QUANTITY = [...BUSINESS_CARD_QUANTITY_OPTIONS];
 const BC_CORNERS = ["Rectangle", "Rounded"];
 const BC_SIDES = ["Single Sided", "Double Sided"];
 
@@ -126,6 +142,8 @@ function premiumBaseOptions(extraFields: OptionsSchema["fields"] = []): OptionsS
   };
 }
 
+type SeedProduct = Omit<Product, "id" | "created_at" | "price">;
+
 function premiumProduct(
   title: string,
   slug: string,
@@ -144,62 +162,6 @@ function premiumProduct(
     image_url: BUSINESS_CARD_IMAGE,
     active: true,
     options_schema: options,
-  };
-}
-
-const businessCardOptions = (cardType: string): OptionsSchema => ({
-  fields: [
-    {
-      name: "quantity",
-      label: "Quantity",
-      type: "select",
-      options: ["50", "100", "250", "500", "1000", "2500", "5000"],
-      required: true,
-    },
-    {
-      name: "finish",
-      label: "Card Type",
-      type: "select",
-      options: [cardType],
-      required: true,
-    },
-    {
-      name: "sides",
-      label: "Sides",
-      type: "select",
-      options: ["Single Sided", "Double Sided"],
-      required: true,
-    },
-    {
-      name: "need_design_help",
-      label: "Need Design Help",
-      type: "radio",
-      options: ["Yes", "No"],
-      required: true,
-    },
-  ],
-});
-
-type SeedProduct = Omit<Product, "id" | "created_at" | "price">;
-
-function businessCardProduct(
-  line: "Standard" | "Premium" | "Specialty",
-  cardType: string,
-  slug: string,
-  description?: string
-): SeedProduct {
-  const title = `${line} ${cardType} Business Cards`;
-  return {
-    title,
-    slug,
-    category: "Business Cards",
-    description:
-      description ||
-      `${line} ${cardType} business cards from MetroPrint USA (MKT1). Upload your artwork, choose quantity and sides, and checkout online.`,
-    base_price_text: "Starting at $29/500",
-    image_url: BUSINESS_CARD_IMAGE,
-    active: true,
-    options_schema: businessCardOptions(cardType),
   };
 }
 
@@ -222,7 +184,7 @@ const quantityPrint = (opts: string[]): OptionsSchema => ({
   ],
 });
 
-export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
+const SEED_PRODUCTS_BASE: Omit<Product, "id" | "created_at" | "price">[] = [
   // Apparel
   {
     title: "Custom T-Shirt Printing",
@@ -234,81 +196,42 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
     image_url:
       "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&h=600&fit=crop",
     active: true,
-    options_schema: {
-      fields: [
-        {
-          name: "quantity",
-          label: "Quantity",
-          type: "select",
-          options: ["1", "5", "10", "25", "50", "100"],
-          required: true,
-        },
-        {
-          name: "shirt_color",
-          label: "Shirt Color",
-          type: "text",
-          placeholder: "e.g. Navy, White, Black",
-          required: true,
-        },
-        {
-          name: "print_location",
-          label: "Print Location",
-          type: "select",
-          options: ["Front", "Back", "Front and Back"],
-          required: true,
-        },
-        {
-          name: "size_breakdown",
-          label: "Size Breakdown",
-          type: "textarea",
-          placeholder: "e.g. S:2, M:5, L:8, XL:3",
-          required: false,
-        },
-      ],
-    },
+    options_schema: apparelPrintingOptionsSchema({
+      colorName: "shirt_color",
+      colorLabel: "Shirt Color",
+      includeMaterial: true,
+    }),
+  },
+  {
+    title: "Custom Long-Sleeve T-Shirt Printing",
+    slug: "custom-long-sleeve-t-shirt-printing",
+    category: "Apparel",
+    description:
+      "Custom printed long-sleeve T-shirts for teams, businesses, events, and branded apparel.",
+    base_price_text: "Starting at $24.99/shirt",
+    image_url:
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&h=600&fit=crop",
+    active: true,
+    options_schema: apparelPrintingOptionsSchema({
+      colorName: "shirt_color",
+      colorLabel: "Shirt Color",
+      includeMaterial: true,
+    }),
   },
   {
     title: "Custom Polo Printing",
     slug: "custom-polo-printing",
     category: "Apparel",
     description:
-      "Professional embroidered or printed polos for corporate teams and events.",
+      "Professional custom printed polos for corporate teams, uniforms, and events.",
     base_price_text: "Starting at $18/polo",
     image_url:
-      "https://images.unsplash.com/photo-1622445275463-aba1ab721103?w=800&h=600&fit=crop",
+      "https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop",
     active: true,
-    options_schema: {
-      fields: [
-        {
-          name: "quantity",
-          label: "Quantity",
-          type: "select",
-          options: ["1", "5", "10", "25", "50", "100"],
-          required: true,
-        },
-        {
-          name: "polo_color",
-          label: "Polo Color",
-          type: "text",
-          placeholder: "e.g. Navy, White",
-          required: true,
-        },
-        {
-          name: "print_location",
-          label: "Print/Embroidery Location",
-          type: "select",
-          options: ["Left Chest", "Full Front", "Back", "Sleeve"],
-          required: true,
-        },
-        {
-          name: "size_breakdown",
-          label: "Size Breakdown",
-          type: "textarea",
-          placeholder: "e.g. S:2, M:5, L:8",
-          required: false,
-        },
-      ],
-    },
+    options_schema: apparelPrintingOptionsSchema({
+      colorName: "polo_color",
+      colorLabel: "Polo Color",
+    }),
   },
   {
     title: "Custom Hoodie Printing",
@@ -320,45 +243,17 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
     image_url:
       "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&h=600&fit=crop",
     active: true,
-    options_schema: {
-      fields: [
-        {
-          name: "quantity",
-          label: "Quantity",
-          type: "select",
-          options: ["1", "5", "10", "25", "50", "100"],
-          required: true,
-        },
-        {
-          name: "hoodie_color",
-          label: "Hoodie Color",
-          type: "text",
-          placeholder: "e.g. Black, Gray, Navy",
-          required: true,
-        },
-        {
-          name: "print_location",
-          label: "Print Location",
-          type: "select",
-          options: ["Front", "Back", "Front and Back"],
-          required: true,
-        },
-        {
-          name: "size_breakdown",
-          label: "Size Breakdown",
-          type: "textarea",
-          placeholder: "e.g. S:2, M:5, L:8, XL:3",
-          required: false,
-        },
-      ],
-    },
+    options_schema: apparelPrintingOptionsSchema({
+      colorName: "hoodie_color",
+      colorLabel: "Hoodie Color",
+    }),
   },
   {
     title: "Custom Hats",
     slug: "custom-hats",
     category: "Apparel",
     description:
-      "Embroidered or printed caps, beanies, and trucker hats for your brand.",
+      "Custom embroidered or printed trucker hats and baseball caps for your brand.",
     base_price_text: "Starting at $10/hat",
     image_url:
       "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=800&h=600&fit=crop",
@@ -369,21 +264,21 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
           name: "quantity",
           label: "Quantity",
           type: "select",
-          options: ["12", "24", "48", "72", "144"],
+          options: [...APPAREL_QUANTITY_OPTIONS],
           required: true,
         },
         {
           name: "hat_style",
           label: "Hat Style",
           type: "select",
-          options: ["Structured Cap", "Trucker Hat", "Beanie", "Snapback"],
+          options: ["Trucker Hat", "Baseball Cap"],
           required: true,
         },
         {
           name: "hat_color",
           label: "Hat Color",
-          type: "text",
-          placeholder: "e.g. Black, Navy, Khaki",
+          type: "select",
+          options: [...BASIC_APPAREL_COLORS],
           required: true,
         },
       ],
@@ -505,7 +400,7 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
           name: "quantity",
           label: "Quantity",
           type: "select",
-          options: ["100", "250", "500", "1000", "2500"],
+          options: [...BUSINESS_CARD_QUANTITY_OPTIONS],
           required: true,
         },
         {
@@ -689,80 +584,30 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
     image_url:
       "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&h=600&fit=crop",
     active: true,
-    options_schema: {
-      fields: [
-        {
-          name: "quantity",
-          label: "Quantity",
-          type: "select",
-          options: ["50", "100", "250", "500", "1000"],
-          required: true,
-        },
-        {
-          name: "size",
-          label: "Size",
-          type: "select",
-          options: ['8.5" x 11"', '5.5" x 8.5"', '4" x 6"'],
-          required: true,
-        },
-        {
-          name: "paper_type",
-          label: "Paper Type",
-          type: "select",
-          options: ["100lb Gloss", "100lb Matte", "80lb Text"],
-          required: true,
-        },
-        {
-          name: "sides",
-          label: "Sides",
-          type: "select",
-          options: ["Single Sided", "Double Sided"],
-          required: true,
-        },
-      ],
-    },
+    options_schema: flyerOptionsSchema(),
+  },
+  {
+    title: "Postcards",
+    slug: "postcards",
+    category: "Print Materials",
+    description:
+      "Custom postcards for direct mail, promotions, and events. Choose size, 14pt or 16pt C2S stock, quantity, and sides — upload your artwork at checkout.",
+    base_price_text: "Starting at $39/500",
+    image_url:
+      "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&h=600&fit=crop",
+    active: true,
+    options_schema: postcardOptionsSchema(),
   },
   {
     title: "Brochures",
     slug: "brochures",
     category: "Print Materials",
-    description: "Tri-fold and bi-fold brochures to showcase your products and services.",
+    description: "Custom folded brochures for menus, mailers, guides, and marketing materials.",
     base_price_text: "Starting at $89/250",
     image_url:
       "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&h=600&fit=crop",
     active: true,
-    options_schema: {
-      fields: [
-        {
-          name: "quantity",
-          label: "Quantity",
-          type: "select",
-          options: ["50", "100", "250", "500", "1000"],
-          required: true,
-        },
-        {
-          name: "size",
-          label: "Size",
-          type: "select",
-          options: ['8.5" x 11" Tri-Fold', '11" x 17" Bi-Fold'],
-          required: true,
-        },
-        {
-          name: "paper_type",
-          label: "Paper Type",
-          type: "select",
-          options: ["100lb Gloss", "100lb Matte", "80lb Text"],
-          required: true,
-        },
-        {
-          name: "sides",
-          label: "Sides",
-          type: "select",
-          options: ["Single Sided", "Double Sided"],
-          required: true,
-        },
-      ],
-    },
+    options_schema: brochureOptionsSchema(),
   },
   {
     title: "Posters",
@@ -773,31 +618,7 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
     image_url:
       "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&h=600&fit=crop",
     active: true,
-    options_schema: {
-      fields: [
-        {
-          name: "quantity",
-          label: "Quantity",
-          type: "select",
-          options: ["1", "5", "10", "25", "50", "100"],
-          required: true,
-        },
-        {
-          name: "size",
-          label: "Size",
-          type: "select",
-          options: ['18" x 24"', '24" x 36"', '11" x 17"'],
-          required: true,
-        },
-        {
-          name: "paper_type",
-          label: "Paper Type",
-          type: "select",
-          options: ["Glossy", "Matte", "Satin"],
-          required: true,
-        },
-      ],
-    },
+    options_schema: posterOptionsSchema(),
   },
   {
     title: "Door Hangers",
@@ -808,7 +629,19 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
     image_url:
       "https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=800&h=600&fit=crop",
     active: true,
-    options_schema: quantityPrint(["250", "500", "1000", "2500", "5000"]),
+    options_schema: doorHangerOptionsSchema(),
+  },
+  {
+    title: "Car Door Magnets",
+    slug: "car-door-magnets",
+    category: "Print Materials",
+    description:
+      "Custom removable car door magnets for business advertising, fleets, and local promotions.",
+    base_price_text: "Starting at $49.99",
+    image_url:
+      "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800&h=600&fit=crop",
+    active: true,
+    options_schema: carDoorMagnetOptionsSchema(),
   },
   {
     title: "Bookmarks",
@@ -819,7 +652,7 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
     image_url:
       "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&h=600&fit=crop",
     active: true,
-    options_schema: quantityPrint(["100", "250", "500", "1000", "2500"]),
+    options_schema: bookmarkOptionsSchema(),
   },
   {
     title: "Folders",
@@ -830,7 +663,7 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
     image_url:
       "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&h=600&fit=crop",
     active: true,
-    options_schema: quantityPrint(["50", "100", "250", "500"]),
+    options_schema: folderOptionsSchema(),
   },
   {
     title: "Roll-Up Banners",
@@ -841,24 +674,7 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
     image_url:
       "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop",
     active: true,
-    options_schema: {
-      fields: [
-        {
-          name: "quantity",
-          label: "Quantity",
-          type: "select",
-          options: ["1", "2", "3", "5", "10"],
-          required: true,
-        },
-        {
-          name: "size",
-          label: "Size",
-          type: "select",
-          options: ['33" x 80"', '24" x 72"'],
-          required: true,
-        },
-      ],
-    },
+    options_schema: rollUpBannerOptionsSchema(),
   },
 
   // Promotional Products
@@ -1154,6 +970,13 @@ export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] = [
   },
 
 ];
+
+/** Every storefront product offers the same artwork/design-assistance choice. */
+export const SEED_PRODUCTS: Omit<Product, "id" | "created_at" | "price">[] =
+  SEED_PRODUCTS_BASE.map((product) => ({
+    ...product,
+    options_schema: withDesignHelpField(product.options_schema),
+  }));
 
 export function getSeedProductBySlug(slug: string) {
   return SEED_PRODUCTS.find((p) => p.slug === slug);

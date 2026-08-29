@@ -1,19 +1,37 @@
+import {
+  BUSINESS_CARD_QUANTITY_OPTIONS,
+  CUSTOM_ORDER_QUANTITY,
+} from "@/lib/business-card-quantities";
 import type { OptionsSchema, ProductPricingRules } from "@/lib/types";
+import { isOptionPricingSlug } from "@/lib/admin-pricing-catalog";
 
-/** Relative scale vs anchor quantity for starter quantity prices. */
+/** Relative scale vs 500-card anchor for starter quantity prices. */
 const TIER_SCALE: Record<string, number> = {
-  "25": 0.45,
-  "50": 0.55,
-  "100": 0.7,
   "250": 0.85,
   "500": 1,
-  "1000": 1.35,
-  "2500": 2,
-  "5000": 2.8,
+  "1,000": 1.35,
+  "2,500": 2,
+  "5,000": 2.8,
+  "10,000": 4,
+  [CUSTOM_ORDER_QUANTITY]: 0,
 };
+
+export { BUSINESS_CARD_QUANTITY_OPTIONS, CUSTOM_ORDER_QUANTITY };
 
 export function isBusinessCardSlug(slug: string): boolean {
   return slug.startsWith("business-cards-");
+}
+
+/** Products with quantity-tier + per-option add-on pricing. */
+export function usesOptionPricing(
+  slug?: string,
+  category?: string,
+  optionsSchema?: OptionsSchema
+): boolean {
+  if (!slug || !optionsSchema?.fields.some((f) => f.name === "quantity")) {
+    return false;
+  }
+  return isOptionPricingSlug(slug);
 }
 
 export function usesBusinessCardPricing(
@@ -45,14 +63,18 @@ function defaultQuantityPrices(
 
   const anchor =
     quantities.find((q) => q === "500") ??
-    quantities.find((q) => q === "100") ??
     quantities.find((q) => q === "250") ??
-    quantities[0];
+    quantities.find((q) => q !== CUSTOM_ORDER_QUANTITY) ??
+    "500";
 
   const anchorScale = TIER_SCALE[anchor] ?? 1;
   const prices: Record<string, number> = {};
 
   for (const qty of quantities) {
+    if (qty === CUSTOM_ORDER_QUANTITY) {
+      prices[qty] = 0;
+      continue;
+    }
     const scale = (TIER_SCALE[qty] ?? 1) / anchorScale;
     prices[qty] = Math.round(basePrice * scale * 100) / 100;
   }
@@ -90,7 +112,9 @@ export function resolveOptionPrices(
 export function getLowestQuantityPrice(
   optionPrices: Record<string, Record<string, number>>
 ): number | null {
-  const qtyPrices = Object.values(optionPrices.quantity ?? {});
+  const qtyPrices = Object.values(optionPrices.quantity ?? {}).filter(
+    (price) => price > 0
+  );
   if (!qtyPrices.length) return null;
   return Math.min(...qtyPrices);
 }

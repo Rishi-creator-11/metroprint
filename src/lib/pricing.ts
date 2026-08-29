@@ -5,8 +5,9 @@ import {
 import {
   getLowestQuantityPrice,
   resolveOptionPrices,
-  usesBusinessCardPricing,
+  usesOptionPricing,
 } from "@/lib/business-card-pricing-defaults";
+import { isCustomOrderQuantity } from "@/lib/business-card-quantities";
 import type { OptionsSchema, ProductPricingRules } from "@/lib/types";
 
 export interface PricingContext {
@@ -20,6 +21,7 @@ export interface LinePriceResult {
   unitPrice: number;
   orderQuantity: number;
   isTierPricing: boolean;
+  requiresQuote: boolean;
 }
 
 /** Normalize DB JSON — supports option_prices and legacy quantity_tiers / option_addons. */
@@ -65,7 +67,8 @@ export function calculateLinePrice(
   selectedOptions: Record<string, string>,
   context?: PricingContext
 ): LinePriceResult {
-  const isBusinessCard = usesBusinessCardPricing(
+  const usesTierPricing = usesOptionPricing(
+    context?.slug,
     context?.category,
     context?.optionsSchema
   );
@@ -73,9 +76,19 @@ export function calculateLinePrice(
   const orderQuantity = parseQuantityFromOptions(selectedOptions);
   const qtySelection = selectedOptions.quantity?.trim();
 
+  if (isCustomOrderQuantity(qtySelection)) {
+    return {
+      lineTotal: 0,
+      unitPrice: 0,
+      orderQuantity: 0,
+      isTierPricing: true,
+      requiresQuote: true,
+    };
+  }
+
   let optionPrices = pricingRules?.option_prices ?? {};
 
-  if (isBusinessCard && context?.optionsSchema) {
+  if (usesTierPricing && context?.optionsSchema) {
     optionPrices = resolveOptionPrices(
       basePrice,
       context.optionsSchema,
@@ -89,7 +102,7 @@ export function calculateLinePrice(
   if (qtySelection && optionPrices.quantity?.[qtySelection] != null) {
     lineTotal = Number(optionPrices.quantity[qtySelection]);
     isTierPricing = true;
-  } else if (isBusinessCard) {
+  } else if (usesTierPricing) {
     lineTotal = getStartingPrice(basePrice, { option_prices: optionPrices });
     isTierPricing = true;
   } else if (qtySelection && optionPrices.quantity) {
@@ -114,6 +127,7 @@ export function calculateLinePrice(
     unitPrice: isTierPricing ? lineTotal : basePrice,
     orderQuantity,
     isTierPricing,
+    requiresQuote: false,
   };
 }
 

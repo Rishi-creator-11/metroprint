@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import SiteLayout from "@/components/layout/SiteLayout";
 import { Button } from "@/components/ui/Button";
 import { CONTACT_INFO } from "@/lib/constants";
@@ -58,9 +59,9 @@ export default function RequestQuotePage() {
         <p className="mt-2 text-muted">
           Have a custom project or bulk order? Tell us what you need and we&apos;ll
           send a personalized quote. For standard products,{" "}
-          <a href="/products" className="text-primary hover:underline">
+          <Link href="/products" className="text-primary hover:underline">
             shop with fixed prices
-          </a>{" "}
+          </Link>{" "}
           instead.
         </p>
 

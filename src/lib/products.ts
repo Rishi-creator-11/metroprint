@@ -7,6 +7,7 @@ import {
 import { CATEGORIES } from "@/lib/constants";
 import { withProductPrice } from "@/lib/product-prices";
 import { normalizePricingRules } from "@/lib/pricing";
+import { isOptionPricingSlug } from "@/lib/admin-pricing-catalog";
 import type { Product } from "@/lib/types";
 
 const BUSINESS_CARD_IMAGES: Record<string, string> = {
@@ -22,7 +23,7 @@ const BUSINESS_CARD_IMAGES: Record<string, string> = {
   "business-cards-specialty-magnetic": "https://images.pexels.com/photos/15569097/pexels-photo-15569097.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
 };
 
-function enrichBusinessCardFromSeed<
+function enrichProductFromSeed<
   T extends {
     slug: string;
     category: string;
@@ -33,7 +34,7 @@ function enrichBusinessCardFromSeed<
     base_price_text?: string;
   },
 >(row: T): T {
-  if (!row.slug.startsWith("business-cards-")) return row;
+  if (!isOptionPricingSlug(row.slug)) return row;
   const seed = getSeedProductBySlug(row.slug);
   if (!seed) return row;
   return {
@@ -105,7 +106,7 @@ export async function getProducts(): Promise<Product[]> {
 
     const dbProducts = result.data.map((p) =>
       withProductPrice(
-        enrichBusinessCardFromSeed({
+        enrichProductFromSeed({
           ...p,
           price: p.price != null ? Number(p.price) : null,
           pricing_rules: normalizePricingRules(p.pricing_rules),
@@ -145,7 +146,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 
     if (!result || result.error || !result.data) return seedFallback();
     return withProductPrice(
-      enrichBusinessCardFromSeed({
+      enrichProductFromSeed({
         ...result.data,
         price: result.data.price != null ? Number(result.data.price) : null,
         pricing_rules: normalizePricingRules(result.data.pricing_rules),
@@ -213,7 +214,7 @@ export async function getBusinessCardsBySubcategory(
     }
     return result.data.map((p) =>
       withProductPrice(
-        enrichBusinessCardFromSeed({
+        enrichProductFromSeed({
           ...p,
           price: p.price != null ? Number(p.price) : null,
           pricing_rules: normalizePricingRules(p.pricing_rules),
