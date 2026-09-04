@@ -4,7 +4,7 @@ type Tone = "primary" | "accent" | "success" | "warning" | "danger" | "neutral" 
 
 const tones: Record<Tone, string> = {
   primary: "bg-primary/10 text-primary ring-primary/20",
-  accent: "bg-accent/10 text-accent ring-accent/20",
+  accent: "bg-accent/15 text-accent-ink ring-accent/30",
   success: "bg-green-50 text-green-700 ring-green-600/20",
   warning: "bg-amber-50 text-amber-700 ring-amber-600/20",
   danger: "bg-red-50 text-red-700 ring-red-600/20",

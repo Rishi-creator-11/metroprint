@@ -352,9 +352,13 @@ export function ProductAddToCart({
                   </div>
                 </div>
               )}
+              <p className="mt-2 text-xs text-muted">We review every file before it goes to print — you&apos;ll hear from us first if anything needs a fix.</p>
             </div>
           ) : (
-            <ArtworkUpload files={artworkFiles} onChange={setArtworkFiles} onUploadingChange={setUploadingArtwork} />
+            <div>
+              <ArtworkUpload files={artworkFiles} onChange={setArtworkFiles} onUploadingChange={setUploadingArtwork} />
+              <p className="mt-2 text-xs text-muted">We review every file before it goes to print — you&apos;ll hear from us first if anything needs a fix.</p>
+            </div>
           )}
         </div>
 
@@ -410,7 +414,7 @@ export function ProductAddToCart({
       </div>
 
       {/* Mobile sticky action bar */}
-      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-border bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden">
+      <div className="mobile-safe-bottom fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-border bg-white/95 px-4 pt-3 shadow-[0_-4px_16px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden">
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-muted">
             {isCustomOrder ? "Custom" : hasSelection ? "Total" : "From"}

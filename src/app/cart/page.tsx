@@ -15,6 +15,8 @@ import { toCartRef } from "@/lib/studio/design";
 import {
   readStudioResult, clearStudioResult, setStudioEditState, setStudioIntent,
 } from "@/lib/studio/handoff";
+import { useNavCatalog } from "@/components/layout/nav-context";
+import { CATEGORY_BLURBS } from "@/lib/constants";
 
 const HIDDEN_OPTS = new Set(["need_design_help"]);
 
@@ -23,6 +25,8 @@ export default function CartPage() {
   const { items, removeItem, updateItem, clearCart, subtotal } = useCart();
   const toast = useToast();
   const [checkingAuth, setCheckingAuth] = useState(false);
+  const catalog = useNavCatalog();
+  const popularCategories = catalog.filter((c) => c.products.length > 0).slice(0, 4);
 
   // Apply a design returned from the studio "Edit Artwork" flow.
   useEffect(() => {
@@ -70,13 +74,40 @@ export default function CartPage() {
         <p className="mt-1 text-muted">Review your items and check out securely.</p>
 
         {items.length === 0 ? (
-          <div className="mt-10 rounded-2xl border border-dashed border-border bg-surface/50 px-6 py-16 text-center">
-            <ShoppingBag className="mx-auto text-muted" size={44} />
-            <p className="mt-4 font-semibold text-navy">Your cart is empty</p>
-            <p className="mt-1 text-sm text-muted">Add a product to get started.</p>
+          <div className="mt-10 rounded-2xl border border-border bg-white px-6 py-14 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <ShoppingBag size={28} aria-hidden="true" />
+            </div>
+            <p className="font-display mt-5 text-xl font-semibold text-navy">Your cart is empty</p>
+            <p className="mx-auto mt-1.5 max-w-sm text-sm text-muted">
+              Business cards, signs, apparel, promo — everything ships with upfront pricing. Add a
+              product to get started.
+            </p>
             <Button href="/products" className="mt-6">
               Browse products
             </Button>
+
+            {popularCategories.length > 0 && (
+              <div className="mx-auto mt-10 grid max-w-xl gap-3 border-t border-border pt-8 sm:grid-cols-2">
+                {popularCategories.map((c) => (
+                  <Link
+                    key={c.name}
+                    href={c.href}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-surface/50 px-4 py-3 text-left transition-colors hover:border-primary/40 hover:bg-primary/5"
+                  >
+                    <span className="text-xl" aria-hidden="true">
+                      {CATEGORY_BLURBS[c.name]?.icon ?? "🖨️"}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-semibold text-navy">{c.name}</span>
+                      <span className="block truncate text-xs text-muted">
+                        {c.products.length} product{c.products.length === 1 ? "" : "s"}
+                      </span>
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_22rem]">

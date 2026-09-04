@@ -32,7 +32,7 @@ export function ColorSwatches({
               aria-label={opt}
               title={opt}
               onClick={() => onChange(opt)}
-              className={`relative h-9 w-9 rounded-full transition-transform duration-150 hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+              className={`relative flex h-11 w-11 items-center justify-center rounded-full transition-transform duration-150 hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                 selected ? "ring-2 ring-primary ring-offset-2" : ""
               }`}
               style={{ backgroundColor: hex, boxShadow: `inset 0 0 0 1px ${border}` }}

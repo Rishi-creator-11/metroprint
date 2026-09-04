@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ImageOff } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { formatPrice, getProductDisplayPrice } from "@/lib/products/product-prices";
 import type { Product } from "@/lib/types";
@@ -31,7 +31,10 @@ export function ProductCard({ product, href }: { product: Product; href?: string
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
         ) : (
-          <div className="grid h-full place-items-center text-xs text-muted">No image</div>
+          <div className="grid h-full place-items-center gap-1.5 text-muted">
+            <ImageOff size={22} aria-hidden="true" />
+            <span className="text-xs">Image coming soon</span>
+          </div>
         )}
         {featured && (
           <div className="absolute left-3 top-3">
@@ -41,7 +44,7 @@ export function ProductCard({ product, href }: { product: Product; href?: string
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+        <p className="text-xs font-semibold text-primary">
           {product.subcategory ? `${product.category} · ${product.subcategory}` : product.category}
         </p>
         <h3 className="mt-1 font-semibold leading-snug text-navy transition-colors group-hover:text-primary">

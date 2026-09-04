@@ -24,7 +24,6 @@ export function GoogleAuthButton({
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`,
-        queryParams: { access_type: "offline", prompt: "consent" },
       },
     });
 

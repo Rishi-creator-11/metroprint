@@ -53,6 +53,9 @@ export function Footer() {
               <li><Link href="/request-quote" className="hover:text-accent">Request a quote</Link></li>
               <li><Link href="/contact" className="hover:text-accent">Contact</Link></li>
               <li><Link href="/account" className="hover:text-accent">My account</Link></li>
+            </ul>
+            <h3 className="mb-3 mt-6 text-xs font-bold uppercase tracking-[0.15em] text-white/50">Help</h3>
+            <ul className="space-y-2 text-sm text-white/70">
               <li><Link href="/privacy" className="hover:text-accent">Privacy policy</Link></li>
               <li><Link href="/terms" className="hover:text-accent">Terms of service</Link></li>
             </ul>
@@ -61,15 +64,24 @@ export function Footer() {
           <div>
             <h3 className="mb-3 text-xs font-bold uppercase tracking-[0.15em] text-white/50">Get in touch</h3>
             <ul className="space-y-2.5 text-sm text-white/70">
-              <li className="flex items-center gap-2">
-                <Mail size={15} className="text-accent" /> {CONTACT_INFO.email}
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone size={15} className="text-accent" /> {CONTACT_INFO.phone}
-              </li>
-              <li className="flex items-center gap-2">
-                <Clock size={15} className="text-accent" /> {CONTACT_INFO.hours}
-              </li>
+              {CONTACT_INFO.email && (
+                <li className="flex items-center gap-2">
+                  <Mail size={15} className="shrink-0 text-accent" />
+                  <a href={`mailto:${CONTACT_INFO.email}`} className="hover:text-accent">
+                    {CONTACT_INFO.email}
+                  </a>
+                </li>
+              )}
+              {CONTACT_INFO.phone && (
+                <li className="flex items-center gap-2">
+                  <Phone size={15} className="shrink-0 text-accent" /> {CONTACT_INFO.phone}
+                </li>
+              )}
+              {CONTACT_INFO.hours && (
+                <li className="flex items-center gap-2">
+                  <Clock size={15} className="shrink-0 text-accent" /> {CONTACT_INFO.hours}
+                </li>
+              )}
             </ul>
           </div>
         </div>

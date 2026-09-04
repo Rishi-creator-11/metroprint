@@ -39,6 +39,27 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Escape closes whichever menu is open.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (mobileOpen) setMobileOpen(false);
+      if (openCat) setOpenCat(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileOpen, openCat]);
+
+  // Lock body scroll while the mobile drawer is open.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
+
   const open = (name: string) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     setOpenCat(name);
@@ -58,7 +79,12 @@ export function Header() {
       )}
     >
       {/* Row 1 — brand + utilities */}
-      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      <div
+        className={cn(
+          "mx-auto flex max-w-7xl items-center gap-3 px-4 transition-[padding] duration-200 sm:px-6 lg:px-8",
+          scrolled ? "py-2" : "py-3",
+        )}
+      >
         <Link href="/" className="shrink-0" aria-label="MetroPrint Marketing — home">
           <LogoCompact />
         </Link>
@@ -166,7 +192,8 @@ export function Header() {
                               key={p.slug}
                               href={p.href}
                               onClick={() => setOpenCat(null)}
-                              className="block w-52 truncate rounded-md px-2 py-1.5 text-[13px] text-muted transition-colors hover:bg-surface hover:text-primary"
+                              className="block w-60 truncate rounded-md px-2 py-1.5 text-[13px] text-muted transition-colors hover:bg-surface hover:text-primary focus-visible:bg-surface focus-visible:text-primary"
+                              title={p.title}
                             >
                               {p.title}
                             </Link>

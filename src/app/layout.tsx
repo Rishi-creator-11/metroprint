@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Fraunces } from "next/font/google";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { ToastProvider } from "@/components/ui/Toast";
 import { NavProvider } from "@/components/layout/nav-context";
@@ -10,6 +10,16 @@ import "./globals.css";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+});
+
+// Editorial display face for headlines only — body copy stays in Inter for legibility.
+const fraunces = Fraunces({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  style: ["normal"],
+  display: "swap",
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -35,8 +45,8 @@ export default async function RootLayout({
   const navCatalog = await getNavCatalog();
 
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-white">
+    <html lang="en" className={`${inter.variable} ${fraunces.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col bg-background">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white"

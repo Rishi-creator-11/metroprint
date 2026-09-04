@@ -99,23 +99,23 @@ export const ACCEPTED_MIME_TYPES = [
 export const HOW_IT_WORKS = [
   {
     step: 1,
-    title: "Choose a product",
-    description: "Browse the catalog with clear, upfront pricing.",
+    title: "Choose & configure",
+    description: "Browse the catalog and pick size, quantity, stock and finish — price updates live.",
   },
   {
     step: 2,
-    title: "Customize it",
-    description: "Pick size, quantity, stock, colour and finish — see the price update live.",
+    title: "Add your artwork",
+    description: "Design it in our Print Studio or upload a print-ready file — whichever's easier.",
   },
   {
     step: 3,
-    title: "Upload artwork",
-    description: "Send us your files or add design help right in the cart.",
+    title: "Review & checkout",
+    description: "Confirm your order summary and pay securely — the price is re-verified on our server.",
   },
   {
     step: 4,
-    title: "We print & deliver",
-    description: "Fast turnaround, quality checks, shipped nationwide.",
+    title: "Proof, print & deliver",
+    description: "We review your files, print, and ship nationwide.",
   },
 ];
 
@@ -162,9 +162,13 @@ export const FAQ = [
   },
 ];
 
+/**
+ * Only include a field here once it's real — every consumer renders these
+ * conditionally and omits the row rather than showing placeholder text.
+ */
 export const CONTACT_INFO = {
   email: "info@metroprintusa.com",
-  phone: "(555) 123-4567",
-  address: "123 Print Avenue, Suite 100, Your City, ST 12345",
-  hours: "Mon–Fri: 8am – 6pm | Sat: 9am – 2pm",
+  phone: "",
+  address: "",
+  hours: "",
 };

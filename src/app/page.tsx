@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Mail, Phone, Check } from "lucide-react";
+import { ArrowRight, Mail, Phone, ShieldCheck, Zap, Palette, Truck } from "lucide-react";
 import SiteLayout from "@/components/layout/SiteLayout";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -31,19 +31,21 @@ export default async function HomePage() {
   const marketingServices = allProducts.filter((p) => p.category === "Marketing Services").slice(0, 5);
   const heroTiles = popular.slice(0, 3);
 
+  const TRUST_ICONS = [ShieldCheck, Zap, Palette, Truck];
+
   return (
     <SiteLayout>
       {/* ---------- HERO ---------- */}
       <section className="hero-grid-bg">
-        <div className="mp-container grid items-center gap-12 py-16 sm:py-24 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="mp-container grid items-center gap-12 py-14 sm:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:py-24">
           <div className="animate-fade-up">
-            <Badge tone="accent">MetroPrint Marketing</Badge>
-            <h1 className="mt-4 text-4xl font-extrabold leading-[1.1] tracking-tight text-navy sm:text-5xl lg:text-6xl">
-              Printing, apparel &amp; marketing that grows your business.
+            <Badge tone="accent">Print · Apparel · Signage · Marketing</Badge>
+            <h1 className="font-display mt-4 text-4xl font-semibold leading-[1.08] tracking-tight text-navy sm:text-5xl lg:text-[3.4rem]">
+              Everything you print, wear, and hand out — one partner, one order.
             </h1>
             <p className="mt-5 max-w-xl text-lg text-muted">
-              Business cards to full brand rollouts — one partner, upfront pricing, fast
-              turnaround, and a real design team behind every order.
+              Business cards, signs, apparel and promo products with upfront pricing,
+              plus the marketing support to put them to work.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button href="/products" size="lg">
@@ -53,13 +55,6 @@ export default async function HomePage() {
                 Request a custom quote
               </Button>
             </div>
-            <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
-              {TRUST_POINTS.map((t) => (
-                <li key={t} className="flex items-center gap-1.5">
-                  <Check size={15} className="text-success" /> {t}
-                </li>
-              ))}
-            </ul>
           </div>
 
           <div className="animate-scale-in grid grid-cols-2 gap-4">
@@ -86,6 +81,23 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ---------- TRUST STRIP ---------- */}
+      <section className="border-y border-border bg-white">
+        <div className="mp-container">
+          <ul className="grid grid-cols-2 divide-x divide-y divide-border sm:grid-cols-4 sm:divide-y-0">
+            {TRUST_POINTS.map((t, i) => {
+              const Icon = TRUST_ICONS[i] ?? ShieldCheck;
+              return (
+                <li key={t} className="flex items-center gap-2.5 px-4 py-4 text-sm font-medium text-navy sm:justify-center">
+                  <Icon size={18} className="shrink-0 text-primary" aria-hidden="true" />
+                  <span>{t}</span>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </section>
 
@@ -125,6 +137,26 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ---------- HOW IT WORKS ---------- */}
+      <section className="bg-surface py-16 sm:py-20">
+        <div className="mp-container">
+          <Reveal>
+            <SectionHeading eyebrow="Simple process" title="How it works" align="center" />
+          </Reveal>
+          <Reveal className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" delay={60}>
+            {HOW_IT_WORKS.map((step) => (
+              <div key={step.step} className="print-mark relative rounded-2xl border border-border bg-white p-6">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-lg font-bold text-white">
+                  {step.step}
+                </span>
+                <h3 className="mt-4 font-bold text-navy">{step.title}</h3>
+                <p className="mt-1.5 text-sm text-muted">{step.description}</p>
+              </div>
+            ))}
+          </Reveal>
+        </div>
+      </section>
+
       {/* ---------- WHY METROPRINT ---------- */}
       <section className="mp-container py-16 sm:py-20">
         <Reveal>
@@ -139,26 +171,6 @@ export default async function HomePage() {
             </div>
           ))}
         </Reveal>
-      </section>
-
-      {/* ---------- HOW IT WORKS ---------- */}
-      <section className="bg-surface py-16 sm:py-20">
-        <div className="mp-container">
-          <Reveal>
-            <SectionHeading eyebrow="Simple process" title="How it works" align="center" />
-          </Reveal>
-          <Reveal className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" delay={60}>
-            {HOW_IT_WORKS.map((step) => (
-              <div key={step.step} className="relative rounded-2xl border border-border bg-white p-6">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-lg font-bold text-white">
-                  {step.step}
-                </span>
-                <h3 className="mt-4 font-bold text-navy">{step.title}</h3>
-                <p className="mt-1.5 text-sm text-muted">{step.description}</p>
-              </div>
-            ))}
-          </Reveal>
-        </div>
       </section>
 
       {/* ---------- MARKETING SERVICES ---------- */}
@@ -194,7 +206,7 @@ export default async function HomePage() {
       {/* ---------- QUOTE CTA ---------- */}
       <section className="mp-container pb-4">
         <Reveal className="overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary-dark px-6 py-14 text-center text-white sm:px-12">
-          <h2 className="text-2xl font-bold sm:text-3xl">Have a bigger project?</h2>
+          <h2 className="font-display text-2xl font-semibold sm:text-3xl">Have a bigger project?</h2>
           <p className="mx-auto mt-3 max-w-xl text-white/80">
             Bulk orders, custom sizes, multi-item brand kits, ongoing marketing — tell us what
             you need and we&apos;ll send a tailored quote.
@@ -209,7 +221,9 @@ export default async function HomePage() {
           </div>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-white/70">
             <span className="inline-flex items-center gap-2"><Mail size={16} /> {CONTACT_INFO.email}</span>
-            <span className="inline-flex items-center gap-2"><Phone size={16} /> {CONTACT_INFO.phone}</span>
+            {CONTACT_INFO.phone && (
+              <span className="inline-flex items-center gap-2"><Phone size={16} /> {CONTACT_INFO.phone}</span>
+            )}
           </div>
         </Reveal>
       </section>
@@ -227,7 +241,7 @@ export default async function HomePage() {
       {/* ---------- FINAL CTA ---------- */}
       <section className="bg-navy py-16 text-center text-white sm:py-20">
         <div className="mp-container">
-          <h2 className="text-2xl font-bold sm:text-3xl">Ready to print something great?</h2>
+          <h2 className="font-display text-2xl font-semibold sm:text-3xl">Ready to print something great?</h2>
           <p className="mx-auto mt-3 max-w-lg text-white/70">
             Browse the catalog, configure your order, and check out securely in minutes.
           </p>

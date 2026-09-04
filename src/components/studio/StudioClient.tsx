@@ -130,16 +130,29 @@ export function StudioClient({
   // history
   const past = useRef<StudioDesign[]>([]);
   const future = useRef<StudioDesign[]>([]);
+  const dirtyRef = useRef(false);
   const [, forceRerender] = useReducer((x) => x + 1, 0);
   const commit = useCallback(
     (action: Action) => {
       past.current = [...past.current.slice(-49), design];
       future.current = [];
+      dirtyRef.current = true;
       dispatch(action);
       forceRerender();
     },
     [design],
   );
+
+  // Warn before an accidental tab close / refresh with unsaved edits.
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!dirtyRef.current) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, []);
   const undo = () => {
     const prev = past.current.pop();
     if (!prev) return;
@@ -356,22 +369,32 @@ export function StudioClient({
       cartItemId: intent?.cartItemId,
     });
     void toCartRef; // ref shape is rebuilt on the receiving page
+    dirtyRef.current = false;
     clearStudioIntent();
     const back = intent?.returnTo || `/products/${product.slug}`;
     router.push(back);
   };
 
+  const exitStudio = () => {
+    if (dirtyRef.current && !window.confirm("Discard your unsaved changes and leave the Studio?")) {
+      return;
+    }
+    router.push(intent?.returnTo || `/products/${product.slug}`);
+  };
+
   const dpiBadge = (l: ArtworkLayer) => {
     const dpi = layerDpi(l);
     const r = ratingForDpi(dpi);
+    const word = r === "good" ? "Print quality" : r === "warn" ? "Low resolution" : "Very low resolution";
     return (
       <span
+        title={`~${dpi} DPI at current size`}
         className={
           "rounded px-1.5 py-0.5 text-[10px] font-bold " +
           (r === "good" ? "bg-green-100 text-green-700" : r === "warn" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700")
         }
       >
-        ~{dpi} DPI
+        {word} · ~{dpi} DPI
       </span>
     );
   };
@@ -381,7 +404,8 @@ export function StudioClient({
       {/* top bar */}
       <header className="flex shrink-0 items-center gap-2 border-b border-border bg-white px-3 py-2 sm:gap-3 sm:px-4">
         <button
-          onClick={() => router.push(intent?.returnTo || `/products/${product.slug}`)}
+          onClick={exitStudio}
+          title="Exit the Studio"
           className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-muted hover:bg-surface"
         >
           <ChevronLeft size={16} /> <span className="hidden sm:inline">Exit</span>
@@ -394,14 +418,19 @@ export function StudioClient({
           </p>
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={undo} disabled={!past.current.length} className="rounded-lg p-2 text-muted hover:bg-surface disabled:opacity-30" aria-label="Undo"><Undo2 size={16} /></button>
-          <button onClick={redo} disabled={!future.current.length} className="rounded-lg p-2 text-muted hover:bg-surface disabled:opacity-30" aria-label="Redo"><Redo2 size={16} /></button>
-          <button onClick={() => setPreview((p) => !p)} className={"flex items-center gap-1 rounded-lg px-2.5 py-2 text-sm font-medium " + (preview ? "bg-primary/10 text-primary" : "text-muted hover:bg-surface")}>
+          <button onClick={undo} disabled={!past.current.length} title="Undo" className="rounded-lg p-2 text-muted hover:bg-surface disabled:opacity-30" aria-label="Undo"><Undo2 size={16} /></button>
+          <button onClick={redo} disabled={!future.current.length} title="Redo" className="rounded-lg p-2 text-muted hover:bg-surface disabled:opacity-30" aria-label="Redo"><Redo2 size={16} /></button>
+          <button
+            onClick={() => setPreview((p) => !p)}
+            title={preview ? "Show print guides" : "Preview without guides"}
+            className={"flex items-center gap-1 rounded-lg px-2.5 py-2 text-sm font-medium " + (preview ? "bg-primary/10 text-primary" : "text-muted hover:bg-surface")}
+          >
             {preview ? <EyeOff size={15} /> : <Eye size={15} />} <span className="hidden md:inline">Preview</span>
           </button>
           <button
             onClick={finish}
             disabled={saving || blocking.length > 0}
+            title={blocking.length > 0 ? "Resolve the errors below first" : "Save this design and return to the product"}
             className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-50"
           >
             {saving ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />} Done

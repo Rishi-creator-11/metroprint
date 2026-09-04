@@ -52,8 +52,8 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-lg font-semibold text-navy">Contact</h2>
             <p>
-              Questions about this policy? Email {CONTACT_INFO.email} or call{" "}
-              {CONTACT_INFO.phone}.
+              Questions about this policy? Email {CONTACT_INFO.email}
+              {CONTACT_INFO.phone ? <> or call {CONTACT_INFO.phone}</> : null}.
             </p>
           </section>
         </div>

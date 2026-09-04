@@ -81,7 +81,7 @@ export function ActivityPopup() {
       className={`fixed left-4 z-30 max-w-[19rem] transition-all duration-500 ${
         onProductDetail ? "bottom-24 lg:bottom-4" : "bottom-4"
       } ${visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0"}`}
-      aria-live="polite"
+      role="status"
     >
       <div className="flex items-center gap-3 rounded-2xl border border-border bg-white/95 p-3 pr-8 shadow-xl backdrop-blur">
         <Link href={`/products/${e.slug}`} className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-surface">
@@ -91,7 +91,7 @@ export function ActivityPopup() {
           <p className="truncate text-sm text-navy">
             <span className="font-semibold">{e.name}</span> ordered {e.qty}× {e.product}
           </p>
-          <p className="text-[10px] font-medium uppercase tracking-wide text-muted">Sample activity · a few minutes ago</p>
+          <p className="text-xs font-medium text-muted">Demo activity, not a live order</p>
         </div>
         <button
           type="button"

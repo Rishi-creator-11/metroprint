@@ -54,7 +54,8 @@ export default function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-navy">Contact</h2>
             <p>
-              {CONTACT_INFO.email} · {CONTACT_INFO.phone}
+              {CONTACT_INFO.email}
+              {CONTACT_INFO.phone ? ` · ${CONTACT_INFO.phone}` : ""}
             </p>
           </section>
         </div>

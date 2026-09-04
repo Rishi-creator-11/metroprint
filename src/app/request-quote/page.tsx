@@ -121,7 +121,8 @@ export default function RequestQuotePage() {
         </form>
 
         <p className="mt-8 text-sm text-muted">
-          Or reach us at {CONTACT_INFO.email} · {CONTACT_INFO.phone}
+          Or reach us at {CONTACT_INFO.email}
+          {CONTACT_INFO.phone ? ` · ${CONTACT_INFO.phone}` : ""}
         </p>
       </div>
     </SiteLayout>

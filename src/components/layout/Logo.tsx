@@ -1,21 +1,50 @@
-export function Logo({ className = "" }: { className?: string }) {
+/** A restrained nod to a printer's registration mark — used in place of a generic dot cluster. */
+function RegistrationMark({ className = "", size = 22 }: { className?: string; size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9.5" stroke="currentColor" strokeWidth="1.4" opacity="0.9" />
+      <circle cx="12" cy="12" r="3.2" fill="currentColor" />
+      <path d="M12 0.5V6.5M12 17.5V23.5M0.5 12H6.5M17.5 12H23.5" stroke="currentColor" strokeWidth="1.4" opacity="0.9" />
+    </svg>
+  );
+}
+
+export function Logo({
+  className = "",
+  tone = "dark",
+}: {
+  className?: string;
+  tone?: "light" | "dark";
+}) {
+  const light = tone === "light";
   return (
     <div className={`flex flex-col items-center ${className}`}>
-      <div className="mb-2 flex gap-2">
-        <span className="h-3 w-3 rounded-full bg-cyan-400" />
-        <span className="h-3 w-3 rounded-full bg-fuchsia-500" />
-        <span className="h-3 w-3 rounded-full bg-yellow-400" />
-      </div>
+      <RegistrationMark size={30} className={light ? "mb-2 text-accent" : "mb-2 text-primary"} />
       <div className="text-center">
-        <span className="block text-2xl font-bold tracking-tight text-navy sm:text-3xl">
-          METROPRINT
+        <span
+          className={`font-display block text-2xl font-semibold tracking-tight sm:text-3xl ${
+            light ? "text-white" : "text-navy"
+          }`}
+        >
+          Metroprint
         </span>
         <div className="mt-0.5 flex items-center justify-center gap-2">
-          <span className="h-0.5 w-6 bg-cyan-400" />
-          <span className="text-base font-semibold tracking-[0.3em] text-accent sm:text-lg">
-            MARKETING
+          <span className={`h-px w-6 ${light ? "bg-white/25" : "bg-border"}`} />
+          <span
+            className={`text-[11px] font-bold uppercase tracking-[0.28em] sm:text-xs ${
+              light ? "text-accent" : "text-accent-ink"
+            }`}
+          >
+            Marketing
           </span>
-          <span className="h-0.5 w-6 bg-fuchsia-500" />
+          <span className={`h-px w-6 ${light ? "bg-white/25" : "bg-border"}`} />
         </div>
       </div>
     </div>
@@ -31,17 +60,13 @@ export function LogoCompact({
 }) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div className="flex gap-1">
-        <span className="h-2 w-2 rounded-full bg-cyan-400" />
-        <span className="h-2 w-2 rounded-full bg-fuchsia-500" />
-        <span className="h-2 w-2 rounded-full bg-yellow-400" />
-      </div>
+      <RegistrationMark size={20} className={tone === "dark" ? "text-primary" : "text-accent"} />
       <span
-        className={`text-lg font-bold tracking-tight ${
+        className={`font-display text-lg font-semibold tracking-tight ${
           tone === "dark" ? "text-navy" : "text-white"
         }`}
       >
-        MetroPrint <span className="font-normal text-accent">Marketing</span>
+        Metroprint <span className="font-normal text-accent">Marketing</span>
       </span>
     </div>
   );

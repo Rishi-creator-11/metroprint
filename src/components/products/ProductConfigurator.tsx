@@ -66,12 +66,10 @@ export function ProductConfigurator({
     <div className="grid gap-8 lg:grid-cols-2 lg:gap-14">
       <div className="lg:sticky lg:top-24 lg:self-start">
         <div className="flex items-center gap-2">
-          {eyebrow && (
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">{eyebrow}</p>
-          )}
+          {eyebrow && <p className="text-sm font-semibold text-primary">{eyebrow}</p>}
           {product.featured_rank != null && <Badge tone="featured">★ Popular</Badge>}
         </div>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-navy sm:text-3xl">{product.title}</h1>
+        <h1 className="font-display mt-2 text-2xl font-semibold tracking-tight text-navy sm:text-3xl">{product.title}</h1>
         {displayPrice > 0 && (
           <p className="mt-2 text-sm text-muted">
             From{" "}
@@ -104,10 +102,17 @@ export function ProductConfigurator({
           )}
         </div>
 
-        {showColorPreview && selectedColor && (
-          <p className="mt-3 text-sm text-muted">
-            Showing: <span className="font-semibold text-navy">{selectedColor}</span>
-          </p>
+        {showColorPreview && (
+          <div className="mt-3 space-y-1">
+            {selectedColor && (
+              <p className="text-sm text-muted">
+                Showing: <span className="font-semibold text-navy">{selectedColor}</span>
+              </p>
+            )}
+            <p className="text-xs text-muted">
+              A mockup preview — on-screen colour may vary slightly from the finished print.
+            </p>
+          </div>
         )}
 
         {!showColorPreview && thumbs.length > 1 && (
