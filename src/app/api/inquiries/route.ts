@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { generateOrderNumber } from "@/lib/order-utils";
+import { generateOrderNumber } from "@/lib/checkout/order-utils";
 import { sendInquiryNotification } from "@/lib/email";
 
 export async function POST(request: Request) {

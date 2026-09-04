@@ -1,18 +1,58 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Trash2, ShoppingBag, ArrowRight, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Trash2, ShoppingBag, ArrowRight, ShieldCheck, Truck, RefreshCw, Pencil } from "lucide-react";
 import SiteLayout from "@/components/layout/SiteLayout";
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/components/cart/CartProvider";
-import { formatPrice } from "@/lib/product-prices";
+import { useToast } from "@/components/ui/Toast";
+import { formatPrice } from "@/lib/products/product-prices";
 import { createClient } from "@/lib/supabase/client";
+import { toCartRef } from "@/lib/studio/design";
+import {
+  readStudioResult, clearStudioResult, setStudioEditState, setStudioIntent,
+} from "@/lib/studio/handoff";
+
+const HIDDEN_OPTS = new Set(["need_design_help"]);
 
 export default function CartPage() {
   const router = useRouter();
-  const { items, removeItem, clearCart, subtotal } = useCart();
+  const { items, removeItem, updateItem, clearCart, subtotal } = useCart();
+  const toast = useToast();
   const [checkingAuth, setCheckingAuth] = useState(false);
+
+  // Apply a design returned from the studio "Edit Artwork" flow.
+  useEffect(() => {
+    for (const item of items) {
+      if (!item.design_full) continue;
+      const result = readStudioResult(item.product_slug);
+      if (result?.cartItemId === item.id && result.design) {
+        updateItem(item.id, {
+          design: toCartRef(result.design, result.thumbnailUrl),
+          design_full: result.design,
+          image_url: result.thumbnailUrl || item.image_url,
+        });
+        clearStudioResult(item.product_slug);
+        toast.success("Artwork updated");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length]);
+
+  const editArtwork = (item: (typeof items)[number]) => {
+    if (!item.design_full) return;
+    setStudioEditState(item.product_slug, item.design_full);
+    setStudioIntent({
+      slug: item.product_slug,
+      selectedOptions: item.selected_options,
+      returnTo: "/cart",
+      cartItemId: item.id,
+    });
+    router.push(`/studio/${item.product_slug}`);
+  };
 
   const goToCheckout = async () => {
     setCheckingAuth(true);
@@ -20,125 +60,147 @@ export default function CartPage() {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-
-    if (!user) {
-      router.push("/login?redirect=/checkout");
-      return;
-    }
-    router.push("/checkout");
+    router.push(user ? "/checkout" : "/login?redirect=/checkout");
   };
 
   return (
     <SiteLayout>
-      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-navy">Your Cart</h1>
-        <p className="mt-2 text-muted">Review items and proceed to secure checkout.</p>
+      <div className="mp-container py-10 sm:py-14">
+        <h1 className="text-3xl font-extrabold tracking-tight text-navy">Your cart</h1>
+        <p className="mt-1 text-muted">Review your items and check out securely.</p>
 
         {items.length === 0 ? (
-          <div className="mt-12 rounded-xl border border-border bg-surface p-12 text-center">
-            <ShoppingBag className="mx-auto mb-4 text-muted" size={48} />
-            <p className="text-muted">Your cart is empty.</p>
+          <div className="mt-10 rounded-2xl border border-dashed border-border bg-surface/50 px-6 py-16 text-center">
+            <ShoppingBag className="mx-auto text-muted" size={44} />
+            <p className="mt-4 font-semibold text-navy">Your cart is empty</p>
+            <p className="mt-1 text-sm text-muted">Add a product to get started.</p>
             <Button href="/products" className="mt-6">
-              Browse Products
+              Browse products
             </Button>
           </div>
         ) : (
-          <>
-            <ul className="mt-8 space-y-4">
-              {items.map((item) => (
-                <li
-                  key={item.id}
-                  className="rounded-xl border border-border bg-white p-5 shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <p className="text-xs font-medium uppercase tracking-wide text-primary">
-                        {item.category}
-                      </p>
-                      <h3 className="font-semibold text-navy">{item.product_title}</h3>
-                      <dl className="mt-3 space-y-1 text-sm">
-                        {Object.entries(item.selected_options).map(([k, v]) => (
-                          <div key={k} className="flex gap-2">
-                            <dt className="capitalize text-muted">
-                              {k.replace(/_/g, " ")}:
-                            </dt>
-                            <dd>{v}</dd>
-                          </div>
-                        ))}
-                      </dl>
+          <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_22rem]">
+            <div>
+              <ul className="space-y-4">
+                {items.map((item) => (
+                  <li key={item.id} className="flex gap-4 rounded-2xl border border-border bg-white p-4 shadow-sm">
+                    <Link
+                      href={`/products/${item.product_slug}`}
+                      className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-surface"
+                    >
+                      {item.image_url && (
+                        <Image
+                          src={item.image_url}
+                          alt=""
+                          fill
+                          className={item.design ? "object-contain p-1" : "object-cover"}
+                          sizes="80px"
+                          unoptimized={item.image_url.startsWith("data:")}
+                        />
+                      )}
+                    </Link>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+                            {item.category}
+                          </p>
+                          <h3 className="truncate font-semibold text-navy">{item.product_title}</h3>
+                        </div>
+                        <button
+                          onClick={() => {
+                            removeItem(item.id);
+                            toast.toast("Removed from cart");
+                          }}
+                          className="shrink-0 rounded-lg p-1.5 text-muted hover:bg-red-50 hover:text-danger"
+                          aria-label={`Remove ${item.product_title}`}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {Object.entries(item.selected_options ?? {})
+                          .filter(([k, v]) => v && !HIDDEN_OPTS.has(k))
+                          .map(([k, v]) => (
+                            <span key={k} className="rounded-md bg-surface px-2 py-0.5 text-xs text-navy">
+                              <span className="capitalize text-muted">{k.replace(/_/g, " ")}:</span> {v}
+                            </span>
+                          ))}
+                      </div>
+
                       {item.artwork_files && item.artwork_files.length > 0 && (
-                        <div className="mt-3">
-                          <p className="text-xs font-medium text-muted">Artwork</p>
-                          <ul className="mt-1 space-y-1">
-                            {item.artwork_files.map((file) => (
-                              <li key={file.url}>
-                                <a
-                                  href={file.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-sm text-primary hover:underline"
-                                >
-                                  {file.name}
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
+                        <p className="mt-2 text-xs text-muted">
+                          {item.artwork_files.length} artwork file{item.artwork_files.length === 1 ? "" : "s"} attached
+                        </p>
+                      )}
+
+                      {item.design && (
+                        <div className="mt-2 flex items-center gap-2 text-xs">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-0.5 font-semibold text-green-700">
+                            Artwork uploaded{item.design.sides === 2 ? " · front + back" : ""}
+                          </span>
+                          {item.design_full && (
+                            <button
+                              onClick={() => editArtwork(item)}
+                              className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
+                            >
+                              <Pencil size={11} /> Edit artwork
+                            </button>
+                          )}
                         </div>
                       )}
-                      <p className="mt-3 font-semibold text-navy">
+
+                      <p className="mt-2 font-bold text-navy">
                         {formatPrice(item.line_total || item.unit_price)}
                         {!item.is_tier_pricing && item.quantity > 1 && (
-                          <span className="ml-2 text-sm font-normal text-muted">
-                            ({formatPrice(item.unit_price)} × {item.quantity})
+                          <span className="ml-2 text-xs font-normal text-muted">
+                            {formatPrice(item.unit_price)} × {item.quantity}
                           </span>
                         )}
                       </p>
                     </div>
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      className="rounded-lg p-2 text-muted hover:bg-red-50 hover:text-red-600"
-                      aria-label="Remove item"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
 
-            <div className="mt-8 rounded-xl border border-border bg-surface p-6">
-              <div className="flex items-center justify-between text-lg font-semibold text-navy">
-                <span>Subtotal</span>
+              <div className="mt-4 flex items-center justify-between">
+                <button onClick={clearCart} className="text-sm text-muted hover:text-danger">
+                  Clear cart
+                </button>
+                <Link href="/products" className="text-sm font-semibold text-primary hover:underline">
+                  Continue shopping
+                </Link>
+              </div>
+            </div>
+
+            {/* summary */}
+            <aside className="h-max rounded-2xl border border-border bg-white p-6 shadow-md lg:sticky lg:top-24">
+              <h2 className="font-bold text-navy">Order summary</h2>
+              <div className="mt-4 flex items-center justify-between text-sm text-muted">
+                <span>Subtotal ({items.length} item{items.length === 1 ? "" : "s"})</span>
+                <span className="font-semibold text-navy">{formatPrice(subtotal)}</span>
+              </div>
+              <div className="mt-1 flex items-center justify-between text-sm text-muted">
+                <span>Shipping &amp; tax</span>
+                <span>Calculated at checkout</span>
+              </div>
+              <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-base font-bold text-navy">
+                <span>Total</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
-              <p className="mt-1 text-xs text-muted">
-                Secure payment via Stripe. Sales tax may apply where required.
-              </p>
-            </div>
 
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-              <button
-                onClick={clearCart}
-                className="text-sm text-muted hover:text-red-600"
-              >
-                Clear cart
-              </button>
-              <div className="flex flex-wrap gap-3">
-                <Button href="/products" variant="outline">
-                  Continue Shopping
-                </Button>
-                <Button onClick={goToCheckout} disabled={checkingAuth}>
-                  {checkingAuth ? (
-                    <Loader2 className="animate-spin" size={16} />
-                  ) : (
-                    <>
-                      Checkout <ArrowRight size={16} />
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </>
+              <Button onClick={goToCheckout} loading={checkingAuth} size="lg" className="mt-5 w-full">
+                Checkout <ArrowRight size={18} />
+              </Button>
+
+              <ul className="mt-5 space-y-2 text-xs text-muted">
+                <li className="flex items-center gap-2"><ShieldCheck size={14} className="text-success" /> Secure Stripe checkout — price re-verified on our server</li>
+                <li className="flex items-center gap-2"><Truck size={14} className="text-success" /> Nationwide shipping</li>
+                <li className="flex items-center gap-2"><RefreshCw size={14} className="text-success" /> Free design review before we print</li>
+              </ul>
+            </aside>
+          </div>
         )}
       </div>
     </SiteLayout>

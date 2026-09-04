@@ -1,8 +1,8 @@
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import SiteLayout from "@/components/layout/SiteLayout";
-import { ProductAddToCart } from "@/components/products/ProductAddToCart";
-import { getProductBySlug } from "@/lib/products";
-import { formatPrice, getProductDisplayPrice } from "@/lib/product-prices";
-import Image from "next/image";
+import { ProductConfigurator } from "@/components/products/ProductConfigurator";
+import { getProductBySlug } from "@/lib/products/products";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({
@@ -13,10 +13,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) return { title: "Product Not Found" };
-  return {
-    title: `${product.title} — MetroPrint USA`,
-    description: product.description,
-  };
+  return { title: product.title, description: product.description };
 }
 
 export default async function ProductDetailPage({
@@ -26,49 +23,24 @@ export default async function ProductDetailPage({
 }) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
-
   if (!product) notFound();
 
-  const displayPrice = getProductDisplayPrice(
-    product.slug,
-    product.price,
-    product.pricing_rules,
-    { category: product.category, optionsSchema: product.options_schema }
-  );
+  const categoryHref = `/products?category=${encodeURIComponent(product.category)}`;
 
   return (
     <SiteLayout>
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-wide text-primary">
-              {product.category}
-            </p>
-            <h1 className="mt-2 text-3xl font-bold text-navy">{product.title}</h1>
-            <p className="mt-3 text-sm font-medium uppercase tracking-wide text-muted">
-              From
-            </p>
-            <p className="text-3xl font-bold text-primary">
-              {formatPrice(displayPrice)}
-            </p>
-            <p className="mt-4 text-muted">{product.description}</p>
+      <div className="mp-container py-8 pb-28 sm:py-12 lg:pb-12">
+        <nav className="mb-6 flex items-center gap-1 text-sm text-muted">
+          <Link href="/" className="hover:text-primary">Home</Link>
+          <ChevronRight size={14} />
+          <Link href="/products" className="hover:text-primary">Products</Link>
+          <ChevronRight size={14} />
+          <Link href={categoryHref} className="hover:text-primary">{product.category}</Link>
+          <ChevronRight size={14} />
+          <span className="truncate font-medium text-navy">{product.title}</span>
+        </nav>
 
-            <div className="relative mt-8 aspect-[4/3] overflow-hidden rounded-xl bg-surface">
-              {product.image_url && (
-                <Image
-                  src={product.image_url}
-                  alt={product.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  priority
-                />
-              )}
-            </div>
-          </div>
-
-          <ProductAddToCart product={product} />
-        </div>
+        <ProductConfigurator product={product} eyebrow={product.category} />
       </div>
     </SiteLayout>
   );

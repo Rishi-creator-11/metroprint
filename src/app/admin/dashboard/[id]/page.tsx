@@ -1,7 +1,7 @@
 import { createServiceClient } from "@/lib/supabase/server";
-import { requireAdminUser } from "@/lib/admin-server";
+import { requireAdminUser } from "@/lib/admin/admin-server";
 import { AdminRequestDetail } from "@/components/admin/AdminRequestDetail";
-import { normalizeOrder } from "@/lib/quote-normalize";
+import { normalizeOrder } from "@/lib/checkout/quote-normalize";
 import { notFound } from "next/navigation";
 
 export default async function AdminRequestPage({

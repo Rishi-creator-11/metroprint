@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getStripe } from "@/lib/stripe";
-import { fulfillPaidCheckoutSession } from "@/lib/fulfill-order";
+import { getStripe } from "@/lib/checkout/stripe";
+import { fulfillPaidCheckoutSession } from "@/lib/checkout/fulfill-order";
 
 export async function POST(request: Request) {
   try {

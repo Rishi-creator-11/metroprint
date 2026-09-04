@@ -6,7 +6,7 @@ import {
   MAX_ARTWORK_FILES,
   type ArtworkFile,
   getArtworkAcceptAttribute,
-} from "@/lib/artwork";
+} from "@/lib/checkout/artwork";
 import { ACCEPTED_FILE_TYPES } from "@/lib/constants";
 
 interface ArtworkUploadProps {

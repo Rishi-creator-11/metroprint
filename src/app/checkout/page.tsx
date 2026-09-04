@@ -6,7 +6,7 @@ import Link from "next/link";
 import SiteLayout from "@/components/layout/SiteLayout";
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/components/cart/CartProvider";
-import { formatPrice } from "@/lib/product-prices";
+import { formatPrice } from "@/lib/products/product-prices";
 import { ArtworkFilesList } from "@/components/orders/OrderItemSpecs";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, CreditCard } from "lucide-react";

@@ -11,7 +11,7 @@ import { Loader2 } from "lucide-react";
 export default function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = sanitizeRedirectPath(searchParams.get("redirect"), "/admin/dashboard");
+  const redirect = sanitizeRedirectPath(searchParams.get("redirect"), "/admin");
   const unauthorized = searchParams.get("error") === "unauthorized";
 
   const [email, setEmail] = useState("");

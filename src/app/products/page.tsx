@@ -1,31 +1,22 @@
+import Link from "next/link";
 import SiteLayout from "@/components/layout/SiteLayout";
 import { ProductCard } from "@/components/products/ProductCard";
-import { getProducts, getCategories } from "@/lib/products";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
+import { CategoryTabs } from "@/components/products/CategoryTabs";
+import { Reveal } from "@/components/ui/Reveal";
+import { getProducts } from "@/lib/products/products";
+import { getStorefrontCategories } from "@/lib/products/categories";
+import { SITE_NAME } from "@/lib/constants";
 import type { Product } from "@/lib/types";
 
 export const metadata = {
-  title: "Products — MetroPrint USA",
-  description: "Browse our custom printing, apparel, and marketing services.",
+  title: "Products",
+  description: `Browse printing, apparel, large-format and marketing services from ${SITE_NAME}.`,
 };
 
 const BUSINESS_CARD_LINES = [
-  {
-    key: "standard",
-    label: "Standard",
-    match: (p: Product) => p.slug.startsWith("business-cards-standard"),
-  },
-  {
-    key: "premium",
-    label: "Premium",
-    match: (p: Product) => p.slug.startsWith("business-cards-premium"),
-  },
-  {
-    key: "specialty",
-    label: "Custom",
-    match: (p: Product) => p.slug.startsWith("business-cards-specialty"),
-  },
+  { key: "standard", label: "Standard", match: (p: Product) => p.slug.startsWith("business-cards-standard") },
+  { key: "premium", label: "Premium", match: (p: Product) => p.slug.startsWith("business-cards-premium") },
+  { key: "specialty", label: "Custom", match: (p: Product) => p.slug.startsWith("business-cards-specialty") },
 ] as const;
 
 function groupBusinessCards(products: Product[]) {
@@ -35,154 +26,134 @@ function groupBusinessCards(products: Product[]) {
   })).filter((g) => g.products.length > 0);
 }
 
-function businessCardsQuery(category: string, line?: string) {
-  const params = new URLSearchParams({ category });
-  if (line) params.set("line", line);
-  return `/products?${params.toString()}`;
-}
-
 export default async function ProductsPage({
   searchParams,
 }: {
   searchParams: Promise<{ category?: string; line?: string }>;
 }) {
   const { category, line } = await searchParams;
-  const products = await getProducts();
-  const categories = await getCategories();
+  const [products, categories] = await Promise.all([getProducts(), getStorefrontCategories()]);
 
-  const filtered = category
-    ? products.filter((p) => p.category === category)
-    : products;
-
+  const filtered = category ? products.filter((p) => p.category === category) : products;
   const isBusinessCards = category === "Business Cards";
-  const lineMatcher = line
-    ? BUSINESS_CARD_LINES.find((l) => l.key === line)
-    : undefined;
+  const activeCategory = categories.find((c) => c.name === category);
 
-  const businessCardProducts = isBusinessCards
+  const lineMatcher = line ? BUSINESS_CARD_LINES.find((l) => l.key === line) : undefined;
+  const bcProducts = isBusinessCards
     ? lineMatcher
       ? filtered.filter((p) => lineMatcher.match(p))
       : filtered
     : [];
+  const bcGroups = isBusinessCards && !line ? groupBusinessCards(filtered) : null;
 
-  const businessCardGroups =
-    isBusinessCards && !line ? groupBusinessCards(filtered) : null;
+  const grid = "grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 
   return (
     <SiteLayout>
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-navy">Our Products</h1>
-          <p className="mt-2 text-muted">
-            Browse our full catalog with clear pricing. Configure your options,
-            upload artwork, and checkout securely online.
+      {/* header */}
+      <section className="border-b border-border bg-gradient-to-b from-surface to-white">
+        <div className="mp-container py-10 sm:py-12">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
+            {category ? "Category" : "Catalog"}
           </p>
-          {isBusinessCards && (
-            <p className="mt-2 text-sm text-primary">
-              MetroPrint USA business cards — product line MKT1
-            </p>
-          )}
+          <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-navy sm:text-4xl">
+            {category ?? "All products"}
+          </h1>
+          <p className="mt-2 max-w-2xl text-muted">
+            {activeCategory?.description ??
+              "Configurable products with upfront pricing — pick your options, upload artwork, check out securely."}
+          </p>
+          <p className="mt-3 text-sm font-medium text-muted">
+            {filtered.length} product{filtered.length === 1 ? "" : "s"}
+          </p>
         </div>
+      </section>
 
-        {/* Category filter */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          <Link
-            href="/products"
-            className={cn(
-              "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-              !category
-                ? "bg-primary text-white"
-                : "bg-surface text-muted hover:bg-slate-200"
-            )}
-          >
-            All
-          </Link>
-          {categories.map((cat) => {
-            const isBusinessCards = cat === "Business Cards";
-            const href = isBusinessCards
-              ? "/business-cards"
-              : `/products?category=${encodeURIComponent(cat)}`;
-            return (
-              <Link
-                key={cat}
-                href={href}
-                className={cn(
-                  "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                  category === cat
-                    ? "bg-primary text-white"
-                    : "bg-surface text-muted hover:bg-slate-200"
-                )}
-              >
-                {cat}
-              </Link>
-            );
-          })}
-        </div>
+      <div className="mp-container py-8 sm:py-10">
+        <CategoryTabs
+          categories={categories.map((c) => ({
+            name: c.name,
+            href: c.href ?? `/products?category=${encodeURIComponent(c.name)}`,
+          }))}
+          active={category ?? null}
+        />
 
-        {/* Business card subcategories */}
         {isBusinessCards && (
           <div className="mb-8 flex flex-wrap gap-2 border-b border-border pb-6">
-            <Link
-              href={businessCardsQuery("Business Cards")}
-              className={cn(
-                "rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
-                !line
-                  ? "bg-navy text-white"
-                  : "bg-white text-muted ring-1 ring-border hover:text-navy"
-              )}
-            >
-              All types
-            </Link>
-            {BUSINESS_CARD_LINES.map((item) => (
-              <Link
-                key={item.key}
-                href={businessCardsQuery("Business Cards", item.key)}
-                className={cn(
-                  "rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
-                  line === item.key
-                    ? "bg-navy text-white"
-                    : "bg-white text-muted ring-1 ring-border hover:text-navy"
-                )}
-              >
-                {item.label}
-              </Link>
+            <BcTab href="/products?category=Business%20Cards" label="All types" active={!line} />
+            {BUSINESS_CARD_LINES.map((l) => (
+              <BcTab
+                key={l.key}
+                href={`/products?category=Business%20Cards&line=${l.key}`}
+                label={l.label}
+                active={line === l.key}
+              />
             ))}
           </div>
         )}
 
         {filtered.length === 0 ? (
-          <p className="text-muted">No products found in this category.</p>
+          <EmptyState />
         ) : isBusinessCards && line ? (
-          businessCardProducts.length === 0 ? (
-            <p className="text-muted">No products found in this subcategory.</p>
+          bcProducts.length === 0 ? (
+            <EmptyState label="Nothing in this line yet." />
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {businessCardProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+            <Reveal className={grid}>
+              {bcProducts.map((p) => (
+                <ProductCard key={p.id} product={p} />
               ))}
-            </div>
+            </Reveal>
           )
-        ) : isBusinessCards && businessCardGroups && businessCardGroups.length > 0 ? (
-          <div className="space-y-10">
-            {businessCardGroups.map((group) => (
+        ) : isBusinessCards && bcGroups && bcGroups.length > 0 ? (
+          <div className="space-y-12">
+            {bcGroups.map((group) => (
               <section key={group.label}>
-                <h2 className="mb-4 text-xl font-bold text-navy">{group.label}</h2>
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {group.products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                <h2 className="mb-5 text-xl font-bold text-navy">{group.label}</h2>
+                <Reveal className={grid}>
+                  {group.products.map((p) => (
+                    <ProductCard key={p.id} product={p} />
                   ))}
-                </div>
+                </Reveal>
               </section>
             ))}
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filtered.map((product) => (
-              <ProductCard key={product.id} product={product} />
+          <Reveal className={grid}>
+            {filtered.map((p) => (
+              <ProductCard key={p.id} product={p} />
             ))}
-          </div>
+          </Reveal>
         )}
       </div>
     </SiteLayout>
+  );
+}
+
+function BcTab({ href, label, active }: { href: string; label: string; active: boolean }) {
+  return (
+    <Link
+      href={href}
+      className={`rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${
+        active ? "bg-navy text-white" : "bg-white text-muted ring-1 ring-border hover:text-navy"
+      }`}
+    >
+      {label}
+    </Link>
+  );
+}
+
+function EmptyState({ label = "No products in this category yet." }: { label?: string }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-border bg-surface/50 px-6 py-16 text-center">
+      <p className="text-3xl">🗂️</p>
+      <p className="mt-3 font-medium text-navy">{label}</p>
+      <p className="mt-1 text-sm text-muted">Try another category, or browse everything.</p>
+      <Link
+        href="/products"
+        className="mt-4 inline-flex rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark"
+      >
+        View all products
+      </Link>
+    </div>
   );
 }

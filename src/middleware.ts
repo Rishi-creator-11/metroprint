@@ -6,10 +6,9 @@ export async function middleware(request: NextRequest) {
   const response = await updateSession(request);
   const pathname = request.nextUrl.pathname;
 
-  if (
-    pathname.startsWith("/admin/") &&
-    !pathname.startsWith("/admin/login")
-  ) {
+  const isAdminArea = pathname === "/admin" || pathname.startsWith("/admin/");
+
+  if (isAdminArea && !pathname.startsWith("/admin/login")) {
     const { createServerClient } = await import("@supabase/ssr");
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

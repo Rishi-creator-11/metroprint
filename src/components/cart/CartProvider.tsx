@@ -18,6 +18,7 @@ interface CartContextValue {
   subtotal: number;
   addItem: (item: Omit<CartItem, "id">) => void;
   removeItem: (id: string) => void;
+  updateItem: (id: string, patch: Partial<CartItem>) => void;
   clearCart: () => void;
 }
 
@@ -56,6 +57,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => prev.filter((i) => i.id !== id));
   }, []);
 
+  const updateItem = useCallback((id: string, patch: Partial<CartItem>) => {
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
+  }, []);
+
   const clearCart = useCallback(() => setItems([]), []);
 
   const subtotal = useMemo(
@@ -70,9 +75,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       subtotal,
       addItem,
       removeItem,
+      updateItem,
       clearCart,
     }),
-    [items, subtotal, addItem, removeItem, clearCart]
+    [items, subtotal, addItem, removeItem, updateItem, clearCart]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

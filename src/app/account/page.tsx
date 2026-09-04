@@ -6,7 +6,7 @@ import SiteLayout from "@/components/layout/SiteLayout";
 import { Button } from "@/components/ui/Button";
 import { PaymentBadge } from "@/components/ui/WorkflowBadge";
 import { createClient } from "@/lib/supabase/client";
-import { formatPrice } from "@/lib/product-prices";
+import { formatPrice } from "@/lib/products/product-prices";
 import { Loader2 } from "lucide-react";
 import type { Order } from "@/lib/types";
 
@@ -28,10 +28,13 @@ export default function AccountPage() {
         name: u.user_metadata?.full_name || u.email!.split("@")[0],
       });
 
+      // Ownership is by user_id (auth.uid()), NOT email — matches the RLS policy
+      // in supabase/migrations/037_orders_owner_rls.sql. Checkout always records
+      // the server-resolved user_id on the order.
       const { data } = await supabase
         .from("quote_requests")
         .select("*")
-        .eq("email", u.email)
+        .eq("user_id", u.id)
         .eq("payment_status", "paid")
         .order("created_at", { ascending: false });
 

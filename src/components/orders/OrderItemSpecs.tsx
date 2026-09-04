@@ -1,4 +1,4 @@
-import { formatPrice } from "@/lib/product-prices";
+import { formatPrice } from "@/lib/products/product-prices";
 import { ExternalLink } from "lucide-react";
 import type { CartItem } from "@/lib/types";
 
@@ -100,6 +100,59 @@ export function OrderItemSpecs({
 
       {item.artwork_files && item.artwork_files.length > 0 && (
         <ArtworkFilesList files={item.artwork_files} showPreview={showArtworkPreview} />
+      )}
+
+      {item.design && (
+        <div className="mt-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted">
+            Studio design{item.design.specLabel ? ` · ${item.design.specLabel}` : ""}
+          </p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            {([
+              ["Front", item.design.frontUrl],
+              ...(item.design.sides === 2 ? [["Back", item.design.backUrl] as const] : []),
+            ] as const).map(([label, url]) => (
+              <div key={label} className="rounded-lg border border-border">
+                <p className="border-b border-border bg-surface px-2 py-1 text-[11px] font-semibold text-navy">{label}</p>
+                {url ? (
+                  <a href={url} target="_blank" rel="noopener noreferrer" className="block">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt={`${label} artwork`} className="max-h-40 w-full bg-surface object-contain p-2" />
+                    <span className="flex items-center gap-1 border-t border-border px-2 py-1.5 text-xs text-primary hover:underline">
+                      <ExternalLink size={11} /> Open original
+                    </span>
+                  </a>
+                ) : (
+                  <p className="px-2 py-3 text-xs text-muted">No artwork</p>
+                )}
+              </div>
+            ))}
+          </div>
+          {item.design_full && (
+            <details className="mt-2 rounded-lg border border-border bg-surface/50 px-3 py-2">
+              <summary className="cursor-pointer text-xs font-medium text-navy">Placement &amp; print specs</summary>
+              <pre className="mt-2 overflow-x-auto text-[10px] leading-relaxed text-muted">
+                {JSON.stringify(
+                  {
+                    spec: item.design_full.spec,
+                    front: item.design_full.front.layers.map((l) =>
+                      l.kind === "image"
+                        ? { image: l.name, x: +l.x.toFixed(2), y: +l.y.toFixed(2), w: +l.width.toFixed(2), h: +l.height.toFixed(2), rot: l.rotation }
+                        : { text: l.text, x: +l.x.toFixed(2), y: +l.y.toFixed(2) },
+                    ),
+                    back: item.design_full.back?.layers.map((l) =>
+                      l.kind === "image"
+                        ? { image: l.name, x: +l.x.toFixed(2), y: +l.y.toFixed(2), w: +l.width.toFixed(2), h: +l.height.toFixed(2), rot: l.rotation }
+                        : { text: l.text, x: +l.x.toFixed(2), y: +l.y.toFixed(2) },
+                    ),
+                  },
+                  null,
+                  2,
+                )}
+              </pre>
+            </details>
+          )}
+        </div>
       )}
     </div>
   );

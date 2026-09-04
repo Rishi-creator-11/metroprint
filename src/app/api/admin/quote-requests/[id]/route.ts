@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { isAdminUser } from "@/lib/auth";
-import { normalizeOrder } from "@/lib/quote-normalize";
-import { isInquiry } from "@/lib/order-utils";
+import { requireAdminApi } from "@/lib/admin/admin-server";
+import { normalizeOrder } from "@/lib/checkout/quote-normalize";
+import { isInquiry } from "@/lib/checkout/order-utils";
 import { sendOrderStatusUpdateEmail } from "@/lib/email";
 import type { OrderStatus, PaymentStatus } from "@/lib/types";
 
@@ -11,21 +10,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const service = await createServiceClient();
-  const { data: adminUser } = await service.auth.admin.getUserById(user.id);
-  if (!isAdminUser(adminUser?.user)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await requireAdminApi();
+  if ("error" in auth) return auth.error;
+  const { service } = auth;
 
   const body = await request.json();
   const updates: Record<string, unknown> = {};

@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { formatPrice } from "@/lib/product-prices";
+import { formatPrice } from "@/lib/products/product-prices";
 import { CONTACT_INFO, SITE_NAME } from "@/lib/constants";
 import type { OrderStatus } from "@/lib/types";
 

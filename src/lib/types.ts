@@ -6,9 +6,19 @@ export type ProductCategory =
   | "Apparel"
   | "Business Cards"
   | "Print Materials"
+  | "Large Format"
   | "Promotional Products"
-  | "DTF Printing"
   | "Marketing Services";
+
+/** Runtime list of every valid product category (keep in sync with ProductCategory). */
+export const PRODUCT_CATEGORIES: ProductCategory[] = [
+  "Business Cards",
+  "Print Materials",
+  "Large Format",
+  "Apparel",
+  "Promotional Products",
+  "Marketing Services",
+];
 
 export interface OptionField {
   name: string;
@@ -41,7 +51,28 @@ export interface Product {
   options_schema: OptionsSchema;
   pricing_rules?: ProductPricingRules | null;
   active: boolean;
+  /** Within-category display order (nulls sort last). Admin-managed. */
+  sort_order?: number | null;
+  /** Homepage "Popular products" rank (null = not featured). Admin-managed. */
+  featured_rank?: number | null;
+  /** Per-option-value images (e.g. { "Navy": url }) — selecting the value swaps the main image. */
+  variant_images?: Record<string, string> | null;
+  /** Artwork-studio print spec override (admin-managed). `{}` = use code defaults. */
+  print_specs?: Record<string, unknown> | null;
   created_at: string;
+}
+
+/** A storefront category. Managed in `categories` (DB) with the CATEGORIES constant as fallback. */
+export interface Category {
+  id: string;
+  name: ProductCategory | string;
+  slug: string;
+  description: string;
+  image_url: string | null;
+  sort_order: number;
+  visible: boolean;
+  /** Optional dedicated route (e.g. Business Cards → /business-cards). */
+  href?: string;
 }
 
 export interface CartItem {
@@ -56,6 +87,10 @@ export interface CartItem {
   is_tier_pricing?: boolean;
   image_url?: string | null;
   artwork_files?: { name: string; url: string }[];
+  /** Compact reference to a studio design (thumbnail + artwork URLs). */
+  design?: import("@/lib/studio/design").CartDesignRef;
+  /** Full studio design state, for re-opening in the editor. */
+  design_full?: import("@/lib/studio/design").StudioDesign;
 }
 
 export interface Order {

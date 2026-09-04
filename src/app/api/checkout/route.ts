@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { createCheckoutSession } from "@/lib/stripe-checkout";
-import { generateOrderNumber } from "@/lib/order-utils";
-import { collectArtworkUrls } from "@/lib/artwork";
+import { createCheckoutSession } from "@/lib/checkout/stripe-checkout";
+import { generateOrderNumber } from "@/lib/checkout/order-utils";
+import { collectArtworkUrls } from "@/lib/checkout/artwork";
 import {
   getProductPrice,
-} from "@/lib/product-prices";
-import { calculateLinePrice, normalizePricingRules } from "@/lib/pricing";
-import { getSeedProductBySlug } from "@/lib/products-data";
-import { isOptionPricingSlug } from "@/lib/admin-pricing-catalog";
+} from "@/lib/products/product-prices";
+import { calculateLinePrice, normalizePricingRules } from "@/lib/pricing/pricing";
+import { getSeedProductBySlug } from "@/lib/products/products-data";
 import type { CartItem, OptionsSchema } from "@/lib/types";
 
 export async function POST(request: Request) {
@@ -62,6 +61,10 @@ export async function POST(request: Request) {
         fallback.data?.map((row) => ({ ...row, pricing_rules: null })) ?? null;
     }
 
+    const dbRowBySlug = new Map(
+      (dbProducts || []).map((row) => [row.slug, row])
+    );
+
     const productBySlug: Record<
       string,
       {
@@ -71,18 +74,29 @@ export async function POST(request: Request) {
         options_schema: OptionsSchema;
       }
     > = {};
-    for (const row of dbProducts || []) {
-      const seed = getSeedProductBySlug(row.slug);
-      const options_schema = (isOptionPricingSlug(row.slug) && seed
-        ? seed.options_schema
-        : row.options_schema ?? seed?.options_schema ?? { fields: [] }) as OptionsSchema;
 
-      productBySlug[row.slug] = {
-        price: row.price != null ? Number(row.price) : null,
+    // Resolve every requested slug — from the DB row if it exists, otherwise from
+    // the seed definition. Without the seed fallback a Large Format / seed-only
+    // product would have no options_schema here and calculateLinePrice would
+    // charge `price × quantity` instead of the (synthesized) quantity tier.
+    for (const slug of slugs) {
+      const row = dbRowBySlug.get(slug);
+      const seed = getSeedProductBySlug(slug);
+      if (!row && !seed) continue;
+
+      // DB schema is authoritative when it has fields; otherwise fall back to
+      // the seed (covers products with no DB row and legacy empty schemas).
+      const dbSchema = row?.options_schema as OptionsSchema | undefined;
+      const options_schema = (
+        dbSchema?.fields?.length ? dbSchema : seed?.options_schema ?? { fields: [] }
+      ) as OptionsSchema;
+
+      productBySlug[slug] = {
+        price: row?.price != null ? Number(row.price) : null,
         pricing_rules: normalizePricingRules(
-          "pricing_rules" in row ? row.pricing_rules : null
+          row && "pricing_rules" in row ? row.pricing_rules : null
         ),
-        category: row.category ?? seed?.category ?? "",
+        category: row?.category ?? seed?.category ?? "",
         options_schema,
       };
     }
@@ -137,7 +151,12 @@ export async function POST(request: Request) {
             : {},
         cart_items: validatedItems,
         notes: notes || null,
-        file_urls: collectArtworkUrls(validatedItems),
+        file_urls: [
+          ...collectArtworkUrls(validatedItems),
+          ...validatedItems.flatMap((i) =>
+            [i.design?.frontUrl, i.design?.backUrl].filter((u): u is string => !!u),
+          ),
+        ].filter((u, idx, arr) => arr.indexOf(u) === idx),
         status: "pending",
         payment_status: "pending",
         total_amount: total,

@@ -1,33 +1,13 @@
 import { NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { isAdminUser } from "@/lib/auth";
-import { formatPriceLabel, getProductPrice } from "@/lib/product-prices";
-import { getStartingPrice, normalizePricingRules } from "@/lib/pricing";
-import { getSeedProductBySlug } from "@/lib/products-data";
+import { requireAdminApi } from "@/lib/admin/admin-server";
+import { formatPriceLabel, getProductPrice } from "@/lib/products/product-prices";
+import { getStartingPrice, normalizePricingRules } from "@/lib/pricing/pricing";
+import { getSeedProductBySlug } from "@/lib/products/products-data";
 import type { ProductPricingRules } from "@/lib/types";
-
-async function requireAdmin() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
-  }
-
-  const service = await createServiceClient();
-  const { data: adminUser } = await service.auth.admin.getUserById(user.id);
-  if (!isAdminUser(adminUser?.user)) {
-    return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
-  }
-
-  return { service };
-}
 
 function buildPricingUpdates(
   slug: string,
-  body: { price?: number; pricing_rules?: unknown },
+  body: { price?: number; pricing_rules?: unknown; base_price_text?: unknown },
   existingPrice: number | null
 ) {
   const updates: Record<string, unknown> = {};
@@ -55,7 +35,13 @@ function buildPricingUpdates(
   const resolvedBase =
     basePrice ?? getProductPrice(slug, existingPrice != null ? Number(existingPrice) : null);
   const resolvedRules = pricingRules ?? normalizePricingRules(body.pricing_rules) ?? {};
-  updates.base_price_text = formatPriceLabel(getStartingPrice(resolvedBase, resolvedRules));
+
+  const explicitLabel =
+    typeof body.base_price_text === "string" && body.base_price_text.trim()
+      ? body.base_price_text.trim()
+      : undefined;
+  updates.base_price_text =
+    explicitLabel ?? formatPriceLabel(getStartingPrice(resolvedBase, resolvedRules));
 
   return { updates, pricingRules: resolvedRules, basePrice: resolvedBase };
 }
@@ -65,8 +51,8 @@ export async function PATCH(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const auth = await requireAdmin();
-  if ("error" in auth && auth.error) return auth.error;
+  const auth = await requireAdminApi();
+  if ("error" in auth) return auth.error;
   const { service } = auth;
 
   const seed = getSeedProductBySlug(slug);

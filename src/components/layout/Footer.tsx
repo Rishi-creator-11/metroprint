@@ -1,112 +1,85 @@
 import Link from "next/link";
-import { CONTACT_INFO, SITE_NAME } from "@/lib/constants";
+import { Mail, Phone, Clock } from "lucide-react";
+import { CONTACT_INFO, SITE_NAME, TRUST_POINTS } from "@/lib/constants";
 import { LogoCompact } from "./Logo";
+
+const categoryLinks = [
+  { label: "Business Cards", href: "/business-cards" },
+  { label: "Print Materials", href: "/products?category=Print%20Materials" },
+  { label: "Large Format", href: "/products?category=Large%20Format" },
+  { label: "Apparel", href: "/products?category=Apparel" },
+  { label: "Promotional Products", href: "/products?category=Promotional%20Products" },
+  { label: "Marketing Services", href: "/products?category=Marketing%20Services" },
+];
 
 export function Footer() {
   return (
     <footer className="mt-auto bg-navy text-white">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mp-container border-b border-white/10 py-6">
+        <ul className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm text-white/70">
+          {TRUST_POINTS.map((t) => (
+            <li key={t}>✓ {t}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mp-container py-12">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <LogoCompact />
-            <p className="mt-4 text-sm text-white/70">
-              Custom printing, apparel, and marketing solutions for businesses
-              of all sizes.
+            <p className="mt-4 max-w-xs text-sm text-white/70">
+              Printing, apparel and marketing solutions for businesses of every size —
+              done right, delivered fast.
             </p>
           </div>
 
           <div>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider">
-              Quick Links
-            </h3>
+            <h3 className="mb-3 text-xs font-bold uppercase tracking-[0.15em] text-white/50">Shop</h3>
             <ul className="space-y-2 text-sm text-white/70">
-              <li>
-                <Link href="/products" className="hover:text-accent">
-                  Products
-                </Link>
-              </li>
-              <li>
-                <Link href="/request-quote" className="hover:text-accent">
-                  Request Quote
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-accent">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className="hover:text-accent">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="hover:text-accent">
-                  Terms of Service
-                </Link>
-              </li>
+              {categoryLinks.map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href} className="transition-colors hover:text-accent">
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider">
-              Categories
-            </h3>
+            <h3 className="mb-3 text-xs font-bold uppercase tracking-[0.15em] text-white/50">Company</h3>
             <ul className="space-y-2 text-sm text-white/70">
-              <li>
-                <Link href="/business-cards" className="hover:text-accent">
-                  Business Cards
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/products?category=Print+Materials"
-                  className="hover:text-accent"
-                >
-                  Print Materials
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/products?category=Apparel"
-                  className="hover:text-accent"
-                >
-                  Apparel
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/products?category=Marketing+Services"
-                  className="hover:text-accent"
-                >
-                  Marketing Services
-                </Link>
-              </li>
+              <li><Link href="/products" className="hover:text-accent">All products</Link></li>
+              <li><Link href="/request-quote" className="hover:text-accent">Request a quote</Link></li>
+              <li><Link href="/contact" className="hover:text-accent">Contact</Link></li>
+              <li><Link href="/account" className="hover:text-accent">My account</Link></li>
+              <li><Link href="/privacy" className="hover:text-accent">Privacy policy</Link></li>
+              <li><Link href="/terms" className="hover:text-accent">Terms of service</Link></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider">
-              Contact
-            </h3>
-            <ul className="space-y-2 text-sm text-white/70">
-              <li>{CONTACT_INFO.email}</li>
-              <li>{CONTACT_INFO.phone}</li>
-              <li>{CONTACT_INFO.hours}</li>
+            <h3 className="mb-3 text-xs font-bold uppercase tracking-[0.15em] text-white/50">Get in touch</h3>
+            <ul className="space-y-2.5 text-sm text-white/70">
+              <li className="flex items-center gap-2">
+                <Mail size={15} className="text-accent" /> {CONTACT_INFO.email}
+              </li>
+              <li className="flex items-center gap-2">
+                <Phone size={15} className="text-accent" /> {CONTACT_INFO.phone}
+              </li>
+              <li className="flex items-center gap-2">
+                <Clock size={15} className="text-accent" /> {CONTACT_INFO.hours}
+              </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-white/50">
-          © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
-          <span className="mx-2">·</span>
-          <Link href="/privacy" className="hover:text-white/80">
-            Privacy
-          </Link>
-          <span className="mx-2">·</span>
-          <Link href="/terms" className="hover:text-white/80">
-            Terms
-          </Link>
+        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs text-white/50 sm:flex-row">
+          <span>© {new Date().getFullYear()} {SITE_NAME}. All rights reserved.</span>
+          <span className="flex gap-4">
+            <Link href="/privacy" className="hover:text-white/80">Privacy</Link>
+            <Link href="/terms" className="hover:text-white/80">Terms</Link>
+          </span>
         </div>
       </div>
     </footer>

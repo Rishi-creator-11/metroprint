@@ -12,8 +12,8 @@ export function Logo({ className = "" }: { className?: string }) {
         </span>
         <div className="mt-0.5 flex items-center justify-center gap-2">
           <span className="h-0.5 w-6 bg-cyan-400" />
-          <span className="text-lg font-semibold tracking-widest text-accent sm:text-xl">
-            USA
+          <span className="text-base font-semibold tracking-[0.3em] text-accent sm:text-lg">
+            MARKETING
           </span>
           <span className="h-0.5 w-6 bg-fuchsia-500" />
         </div>
@@ -22,7 +22,13 @@ export function Logo({ className = "" }: { className?: string }) {
   );
 }
 
-export function LogoCompact({ className = "" }: { className?: string }) {
+export function LogoCompact({
+  className = "",
+  tone = "light",
+}: {
+  className?: string;
+  tone?: "light" | "dark";
+}) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <div className="flex gap-1">
@@ -30,8 +36,12 @@ export function LogoCompact({ className = "" }: { className?: string }) {
         <span className="h-2 w-2 rounded-full bg-fuchsia-500" />
         <span className="h-2 w-2 rounded-full bg-yellow-400" />
       </div>
-      <span className="text-lg font-bold tracking-tight text-white">
-        MetroPrint <span className="font-normal text-accent">USA</span>
+      <span
+        className={`text-lg font-bold tracking-tight ${
+          tone === "dark" ? "text-navy" : "text-white"
+        }`}
+      >
+        MetroPrint <span className="font-normal text-accent">Marketing</span>
       </span>
     </div>
   );

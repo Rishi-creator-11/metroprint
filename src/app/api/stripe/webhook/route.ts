@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { getStripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/checkout/stripe";
 import { createServiceClient } from "@/lib/supabase/server";
-import { fulfillPaidCheckoutSession } from "@/lib/fulfill-order";
+import { fulfillPaidCheckoutSession } from "@/lib/checkout/fulfill-order";
 
 export async function POST(request: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;

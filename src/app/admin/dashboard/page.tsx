@@ -1,18 +1,18 @@
 import { createServiceClient } from "@/lib/supabase/server";
-import { requireAdminUser } from "@/lib/admin-server";
+import { requireAdminUser } from "@/lib/admin/admin-server";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { PaymentBadge } from "@/components/ui/WorkflowBadge";
 import { TypeBadge } from "@/components/ui/TypeBadge";
 import { AdminHeader } from "@/components/admin/AdminHeader";
-import { normalizeOrder } from "@/lib/quote-normalize";
-import { isInquiry, isPaidOrder } from "@/lib/order-utils";
-import { formatPrice } from "@/lib/product-prices";
+import { normalizeOrder } from "@/lib/checkout/quote-normalize";
+import { isInquiry, isPaidOrder } from "@/lib/checkout/order-utils";
+import { formatPrice } from "@/lib/products/product-prices";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import type { OrderStatus } from "@/lib/types";
 
 export const metadata = {
-  title: "Admin Dashboard — MetroPrint USA",
+  title: "Orders & Inquiries · Admin",
 };
 
 const STATUSES: (OrderStatus | "all")[] = [

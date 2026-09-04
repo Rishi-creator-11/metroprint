@@ -2,14 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Search, Check, Loader2, ChevronRight } from "lucide-react";
-import { formatPrice, formatPriceLabel } from "@/lib/product-prices";
+import { useToast } from "@/components/ui/Toast";
+import { formatPrice, formatPriceLabel } from "@/lib/products/product-prices";
 import {
   buildPricingDraft,
   pricingRulesFromDraft,
   previewTotalFromDraft,
-} from "@/lib/pricing";
-import { isSeedPricingProductId } from "@/lib/admin-pricing-catalog";
-import { pricedOptionFields } from "@/lib/business-card-pricing-defaults";
+} from "@/lib/pricing/pricing";
+import { isSeedPricingProductId } from "@/lib/pricing/admin-pricing-catalog";
+import { pricedOptionFields } from "@/lib/pricing/business-card-pricing-defaults";
 import type { OptionsSchema, ProductCategory, ProductPricingRules } from "@/lib/types";
 
 export interface AdminPricingProduct {
@@ -19,6 +20,7 @@ export interface AdminPricingProduct {
   category: ProductCategory;
   subcategory?: string | null;
   price: number;
+  base_price_text: string;
   active: boolean;
   options_schema: OptionsSchema;
   pricing_rules: ProductPricingRules | null;
@@ -28,6 +30,7 @@ export interface AdminPricingSection {
   id: string;
   label: string;
   description: string;
+  pricingMode: "tiered" | "simple";
   products: AdminPricingProduct[];
 }
 
@@ -64,7 +67,125 @@ function initDrafts(products: AdminPricingProduct[]): Record<string, DraftState>
 
 function initSavedIds(products: AdminPricingProduct[]): Set<string> {
   return new Set(
-    products.filter((p) => p.pricing_rules?.option_prices).map((p) => p.id)
+    products
+      .filter(
+        (p) => Object.keys(p.pricing_rules?.option_prices ?? {}).length > 0,
+      )
+      .map((p) => p.id),
+  );
+}
+
+/** Base-price-only editor for products without quantity-tier pricing. */
+function SimplePriceEditor({
+  product,
+  onSaved,
+}: {
+  product: AdminPricingProduct;
+  onSaved: (id: string) => void;
+}) {
+  const toast = useToast();
+  const [price, setPrice] = useState(String(product.price));
+  const [label, setLabel] = useState(product.base_price_text);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+
+  useEffect(() => {
+    setPrice(String(product.price));
+    setLabel(product.base_price_text);
+    setMessage(null);
+  }, [product.id, product.price, product.base_price_text]);
+
+  const save = async () => {
+    const n = Number(price);
+    if (!Number.isFinite(n) || n <= 0) {
+      setMessage({ type: "err", text: "Enter a base price greater than 0." });
+      return;
+    }
+    setSaving(true);
+    setMessage(null);
+    try {
+      const url = isSeedPricingProductId(product.id)
+        ? `/api/admin/products/by-slug/${encodeURIComponent(product.slug)}`
+        : `/api/admin/products/${product.id}`;
+      const res = await fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ price: n, base_price_text: label.trim() || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not save");
+      onSaved(data.id ?? product.id);
+      setMessage({ type: "ok", text: `Saved base price for ${product.title}` });
+      toast.success(`Saved base price for ${product.title}`);
+    } catch (err) {
+      const text = err instanceof Error ? err.message : "Save failed";
+      setMessage({ type: "err", text });
+      toast.error(text);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="max-w-md">
+      <p className="text-xs font-semibold uppercase text-primary">{product.category}</p>
+      <h3 className="text-lg font-bold text-navy">{product.title}</h3>
+      <p className="mt-1 text-xs text-muted">
+        Flat pricing — customers pay this per unit (or it is shown as the starting
+        price for quote-based services).
+      </p>
+
+      {message && (
+        <p
+          className={`mt-4 rounded-lg px-4 py-2 text-sm ${
+            message.type === "ok" ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"
+          }`}
+        >
+          {message.text}
+        </p>
+      )}
+
+      <label className="mt-6 block text-sm font-medium text-navy">Base price (USD)</label>
+      <div className="mt-1 flex items-center gap-1">
+        <span className="text-sm text-muted">$</span>
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          className="w-40 rounded-lg border border-border bg-white px-3 py-2 text-right text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+      </div>
+
+      <label className="mt-4 block text-sm font-medium text-navy">
+        Display label <span className="font-normal text-muted">(e.g. “Starting at $75/hr”)</span>
+      </label>
+      <input
+        type="text"
+        value={label}
+        onChange={(e) => setLabel(e.target.value)}
+        placeholder="Starting at $…"
+        className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+      />
+
+      <button
+        type="button"
+        onClick={save}
+        disabled={saving}
+        className="mt-6 inline-flex items-center gap-2 rounded-lg bg-navy px-5 py-2.5 text-sm font-semibold text-white hover:bg-navy/90 disabled:opacity-50"
+      >
+        {saving ? (
+          <>
+            <Loader2 size={16} className="animate-spin" /> Saving…
+          </>
+        ) : (
+          <>
+            <Check size={16} /> Save price
+          </>
+        )}
+      </button>
+    </div>
   );
 }
 
@@ -73,6 +194,7 @@ export function AdminPricingHub({
 }: {
   sections: AdminPricingSection[];
 }) {
+  const toast = useToast();
   const [activeSectionId, setActiveSectionId] = useState(sections[0]?.id ?? "");
   const [selectedId, setSelectedId] = useState("");
   const [search, setSearch] = useState("");
@@ -101,6 +223,7 @@ export function AdminPricingHub({
     [activeSection]
   );
   const isBusinessCards = activeSection?.id === "business-cards";
+  const isSimple = activeSection?.pricingMode === "simple";
 
   const subcategories = useMemo(
     () =>
@@ -207,11 +330,11 @@ export function AdminPricingHub({
 
       setSavedIds((prev) => new Set(prev).add(data.id ?? selected.id));
       setMessage({ type: "ok", text: `Saved all option prices for ${selected.title}` });
+      toast.success(`Saved option prices for ${selected.title}`);
     } catch (err) {
-      setMessage({
-        type: "err",
-        text: err instanceof Error ? err.message : "Save failed",
-      });
+      const text = err instanceof Error ? err.message : "Save failed";
+      setMessage({ type: "err", text });
+      toast.error(text);
     } finally {
       setSaving(false);
     }
@@ -262,8 +385,14 @@ export function AdminPricingHub({
           <h2 className="text-xl font-bold">{activeSection?.label}</h2>
           <p className="mt-1 max-w-2xl text-sm text-white/75">
             {activeSection?.description}.{" "}
-            <strong className="text-white">Quantity</strong> = total order price. All other
-            options add on top when selected.
+            {isSimple ? (
+              "Set a single base price per product."
+            ) : (
+              <>
+                <strong className="text-white">Quantity</strong> = total order
+                price. All other options add on top when selected.
+              </>
+            )}
           </p>
         </div>
 
@@ -334,7 +463,15 @@ export function AdminPricingHub({
           </aside>
 
           <div className="flex-1 p-6 sm:p-8">
-            {selected && draft ? (
+            {isSimple && selected ? (
+              <SimplePriceEditor
+                product={selected}
+                onSaved={(id) => {
+                  setSavedIds((prev) => new Set(prev).add(id));
+                  if (isSeedPricingProductId(selected.id)) setSelectedId(id);
+                }}
+              />
+            ) : selected && draft ? (
               <>
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>

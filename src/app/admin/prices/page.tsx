@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
-import { requireAdminUser } from "@/lib/admin-server";
+import { requireAdminUser } from "@/lib/admin/admin-server";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { AdminPricingHub } from "@/components/admin/AdminPricingHub";
-import { loadAdminPricingSections } from "@/lib/admin-pricing-server";
+import { loadAdminPricingSections } from "@/lib/pricing/admin-pricing-server";
 
 export const metadata = {
-  title: "Product Pricing — MetroPrint USA Admin",
+  title: "Pricing · Admin",
 };
 
 export default async function AdminPricesPage() {
@@ -22,7 +22,13 @@ export default async function AdminPricesPage() {
           <div>
             <h1 className="text-2xl font-bold text-navy">Product Pricing</h1>
             <p className="mt-1 text-sm text-muted">
-              Choose a category, pick a product, and set a price for every option.
+              Tiered categories get a full quantity + option editor; flat
+              categories (Promotional, Marketing Services) get a base-price
+              editor. Titles, images, and visibility live under{" "}
+              <Link href="/admin/products" className="text-primary hover:underline">
+                Products
+              </Link>
+              .
             </p>
           </div>
           <Link

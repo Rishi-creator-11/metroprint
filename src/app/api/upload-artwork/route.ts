@@ -4,7 +4,7 @@ import {
   MAX_ARTWORK_FILES,
   sanitizeFilename,
   validateArtworkFile,
-} from "@/lib/artwork";
+} from "@/lib/checkout/artwork";
 
 export async function POST(request: Request) {
   try {

@@ -4,8 +4,8 @@ import { CONTACT_INFO } from "@/lib/constants";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 
 export const metadata = {
-  title: "Contact — MetroPrint USA",
-  description: "Get in touch with MetroPrint USA for custom printing and marketing services.",
+  title: "Contact",
+  description: "Get in touch with MetroPrint Marketing for custom printing and marketing services.",
 };
 
 export default function ContactPage() {

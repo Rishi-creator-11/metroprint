@@ -1,144 +1,240 @@
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowRight, Mail, Phone, Check } from "lucide-react";
 import SiteLayout from "@/components/layout/SiteLayout";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { Reveal } from "@/components/ui/Reveal";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 import { CategoryCard } from "@/components/products/CategoryCard";
 import { ProductCard } from "@/components/products/ProductCard";
-import { Logo } from "@/components/layout/Logo";
-import { CATEGORIES, HOW_IT_WORKS, CONTACT_INFO } from "@/lib/constants";
-import { getPopularProducts } from "@/lib/products";
-import { ArrowRight, Mail, Phone } from "lucide-react";
-import Link from "next/link";
+import { Faq } from "@/components/home/Faq";
+import { getPopularProducts, getProducts } from "@/lib/products/products";
+import { getStorefrontCategories } from "@/lib/products/categories";
+import {
+  HOW_IT_WORKS,
+  WHY_METROPRINT,
+  TRUST_POINTS,
+  CONTACT_INFO,
+} from "@/lib/constants";
 
 export default async function HomePage() {
-  const popularProducts = await getPopularProducts();
+  const [popular, categories, allProducts] = await Promise.all([
+    getPopularProducts(),
+    getStorefrontCategories(),
+    getProducts(),
+  ]);
+
+  const activeByCategory: Record<string, number> = {};
+  for (const p of allProducts) activeByCategory[p.category] = (activeByCategory[p.category] ?? 0) + 1;
+
+  const marketingServices = allProducts.filter((p) => p.category === "Marketing Services").slice(0, 5);
+  const heroTiles = popular.slice(0, 3);
 
   return (
     <SiteLayout>
-      {/* Hero */}
-      <section className="bg-surface">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-          <div className="grid items-center gap-12 lg:grid-cols-2">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-navy sm:text-4xl lg:text-5xl">
-                Custom Printing, Apparel &amp; Marketing Solutions
-              </h1>
-              <p className="mt-4 text-lg text-muted">
-                Business cards, flyers, brochures, apparel, promotional
-                products, DTF printing, graphic design and marketing services.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Button href="/products" size="lg">
-                  Browse Products
-                </Button>
-                <Button href="/request-quote" variant="outline" size="lg">
-                  Request Quote
-                </Button>
+      {/* ---------- HERO ---------- */}
+      <section className="hero-grid-bg">
+        <div className="mp-container grid items-center gap-12 py-16 sm:py-24 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="animate-fade-up">
+            <Badge tone="accent">MetroPrint Marketing</Badge>
+            <h1 className="mt-4 text-4xl font-extrabold leading-[1.1] tracking-tight text-navy sm:text-5xl lg:text-6xl">
+              Printing, apparel &amp; marketing that grows your business.
+            </h1>
+            <p className="mt-5 max-w-xl text-lg text-muted">
+              Business cards to full brand rollouts — one partner, upfront pricing, fast
+              turnaround, and a real design team behind every order.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button href="/products" size="lg">
+                Shop products <ArrowRight size={18} />
+              </Button>
+              <Button href="/request-quote" variant="secondary" size="lg">
+                Request a custom quote
+              </Button>
+            </div>
+            <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
+              {TRUST_POINTS.map((t) => (
+                <li key={t} className="flex items-center gap-1.5">
+                  <Check size={15} className="text-success" /> {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="animate-scale-in grid grid-cols-2 gap-4">
+            {heroTiles.map((p, i) => (
+              <Link
+                key={p.id}
+                href={`/products/${p.slug}`}
+                className={`card-hover relative overflow-hidden rounded-2xl border border-border bg-white shadow-md ${
+                  i === 0 ? "col-span-2 aspect-[16/10]" : "aspect-square"
+                }`}
+              >
+                {p.image_url && (
+                  <Image
+                    src={p.image_url}
+                    alt={p.title}
+                    fill
+                    className={p.category === "Large Format" ? "object-contain p-4" : "object-cover"}
+                    sizes="(max-width: 1024px) 50vw, 25vw"
+                  />
+                )}
+                <span className="absolute bottom-2 left-2 rounded-lg bg-white/90 px-2 py-1 text-xs font-semibold text-navy">
+                  {p.title}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- POPULAR PRODUCTS ---------- */}
+      <section className="mp-container py-16 sm:py-20">
+        <Reveal className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <SectionHeading eyebrow="Best sellers" title="Popular products" subtitle="What businesses order from us most." />
+          <Link href="/products" className="hidden items-center gap-1 text-sm font-semibold text-primary hover:gap-2 sm:inline-flex">
+            View all <ArrowRight size={14} />
+          </Link>
+        </Reveal>
+        <Reveal className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" delay={60}>
+          {popular.slice(0, 6).map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </Reveal>
+      </section>
+
+      {/* ---------- SHOP BY CATEGORY ---------- */}
+      <section className="bg-navy py-16 text-white sm:py-20">
+        <div className="mp-container">
+          <Reveal>
+            <SectionHeading eyebrow="Catalog" title="Shop by category" tone="dark" />
+          </Reveal>
+          <Reveal className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" delay={60}>
+            {categories.map((c) => (
+              <CategoryCard
+                key={c.id}
+                name={c.name}
+                description={c.description}
+                image={c.image_url ?? ""}
+                href={c.href}
+                count={activeByCategory[c.name]}
+              />
+            ))}
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ---------- WHY METROPRINT ---------- */}
+      <section className="mp-container py-16 sm:py-20">
+        <Reveal>
+          <SectionHeading eyebrow="Why us" title="A print partner built for business" align="center" />
+        </Reveal>
+        <Reveal className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" delay={60}>
+          {WHY_METROPRINT.map((item) => (
+            <div key={item.title} className="rounded-2xl border border-border bg-white p-6">
+              <div className="text-2xl">{item.icon}</div>
+              <h3 className="mt-3 font-bold text-navy">{item.title}</h3>
+              <p className="mt-1.5 text-sm text-muted">{item.description}</p>
+            </div>
+          ))}
+        </Reveal>
+      </section>
+
+      {/* ---------- HOW IT WORKS ---------- */}
+      <section className="bg-surface py-16 sm:py-20">
+        <div className="mp-container">
+          <Reveal>
+            <SectionHeading eyebrow="Simple process" title="How it works" align="center" />
+          </Reveal>
+          <Reveal className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" delay={60}>
+            {HOW_IT_WORKS.map((step) => (
+              <div key={step.step} className="relative rounded-2xl border border-border bg-white p-6">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-lg font-bold text-white">
+                  {step.step}
+                </span>
+                <h3 className="mt-4 font-bold text-navy">{step.title}</h3>
+                <p className="mt-1.5 text-sm text-muted">{step.description}</p>
               </div>
-            </div>
-            <div className="flex justify-center rounded-2xl bg-white p-8 shadow-sm lg:p-12">
-              <Logo className="scale-110 sm:scale-125" />
-            </div>
-          </div>
+            ))}
+          </Reveal>
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="bg-navy py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-8 text-2xl font-bold text-white sm:text-3xl">
-            Browse our top categories
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-            {CATEGORIES.map((cat) => (
-              <CategoryCard key={cat.name} {...cat} />
+      {/* ---------- MARKETING SERVICES ---------- */}
+      <section className="mp-container py-16 sm:py-20">
+        <div className="grid items-center gap-10 lg:grid-cols-2">
+          <Reveal>
+            <SectionHeading
+              eyebrow="Beyond printing"
+              title="We do your marketing too"
+              subtitle="MetroPrint Marketing is a full creative partner — branding, design, social media, content and video, alongside everything we print."
+            />
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button href="/products?category=Marketing%20Services">Explore services</Button>
+              <Button href="/request-quote" variant="secondary">Talk to our team</Button>
+            </div>
+          </Reveal>
+          <Reveal className="grid gap-3 sm:grid-cols-2" delay={60}>
+            {marketingServices.map((p) => (
+              <Link
+                key={p.id}
+                href={`/products/${p.slug}`}
+                className="card-hover rounded-2xl border border-border bg-white p-5"
+              >
+                <h3 className="font-semibold text-navy">{p.title}</h3>
+                <p className="mt-1 line-clamp-2 text-sm text-muted">{p.description}</p>
+                <p className="mt-3 text-xs font-semibold text-primary">{p.base_price_text}</p>
+              </Link>
             ))}
-          </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* Popular Products */}
-      <section className="py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 flex items-end justify-between">
-            <h2 className="text-2xl font-bold text-navy sm:text-3xl">
-              Popular products
-            </h2>
-            <Link
-              href="/products"
-              className="hidden items-center gap-1 text-sm font-medium text-primary hover:gap-2 sm:inline-flex"
-            >
-              View all <ArrowRight size={14} />
-            </Link>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {popularProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-          <div className="mt-8 text-center sm:hidden">
-            <Button href="/products" variant="outline">
-              View All Products
+      {/* ---------- QUOTE CTA ---------- */}
+      <section className="mp-container pb-4">
+        <Reveal className="overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary-dark px-6 py-14 text-center text-white sm:px-12">
+          <h2 className="text-2xl font-bold sm:text-3xl">Have a bigger project?</h2>
+          <p className="mx-auto mt-3 max-w-xl text-white/80">
+            Bulk orders, custom sizes, multi-item brand kits, ongoing marketing — tell us what
+            you need and we&apos;ll send a tailored quote.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Button href="/request-quote" size="lg" className="bg-white text-primary hover:bg-surface">
+              Request a quote
+            </Button>
+            <Button href="/contact" size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
+              Contact us
             </Button>
           </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="bg-surface py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-10 text-center text-2xl font-bold text-navy sm:text-3xl">
-            How it works
-          </h2>
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {HOW_IT_WORKS.map((step) => (
-              <div key={step.step} className="text-center">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-white">
-                  {step.step}
-                </div>
-                <h3 className="font-semibold text-navy">{step.title}</h3>
-                <p className="mt-2 text-sm text-muted">{step.description}</p>
-              </div>
-            ))}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-white/70">
+            <span className="inline-flex items-center gap-2"><Mail size={16} /> {CONTACT_INFO.email}</span>
+            <span className="inline-flex items-center gap-2"><Phone size={16} /> {CONTACT_INFO.phone}</span>
           </div>
-        </div>
+        </Reveal>
       </section>
 
-      {/* Contact CTA */}
-      <section className="py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="rounded-2xl bg-primary px-6 py-12 text-center text-white sm:px-12">
-            <h2 className="text-2xl font-bold sm:text-3xl">
-              Ready to get started?
-            </h2>
-            <p className="mx-auto mt-3 max-w-xl text-white/80">
-              Request a free quote today and our team will help bring your
-              project to life.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <Button
-                href="/request-quote"
-                variant="secondary"
-                size="lg"
-                className="bg-white text-primary hover:bg-surface"
-              >
-                Request a Quote
-              </Button>
-              <Button
-                href="/contact"
-                variant="outline"
-                size="lg"
-                className="border-white text-white hover:bg-white hover:text-primary"
-              >
-                Contact Us
-              </Button>
-            </div>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-white/70">
-              <span className="inline-flex items-center gap-2">
-                <Mail size={16} /> {CONTACT_INFO.email}
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <Phone size={16} /> {CONTACT_INFO.phone}
-              </span>
-            </div>
+      {/* ---------- FAQ ---------- */}
+      <section className="mp-container py-16 sm:py-20">
+        <Reveal>
+          <SectionHeading eyebrow="Questions" title="Frequently asked" align="center" />
+        </Reveal>
+        <Reveal className="mt-10" delay={60}>
+          <Faq />
+        </Reveal>
+      </section>
+
+      {/* ---------- FINAL CTA ---------- */}
+      <section className="bg-navy py-16 text-center text-white sm:py-20">
+        <div className="mp-container">
+          <h2 className="text-2xl font-bold sm:text-3xl">Ready to print something great?</h2>
+          <p className="mx-auto mt-3 max-w-lg text-white/70">
+            Browse the catalog, configure your order, and check out securely in minutes.
+          </p>
+          <div className="mt-8">
+            <Button href="/products" size="lg" className="bg-accent text-navy hover:bg-accent/90">
+              Start an order <ArrowRight size={18} />
+            </Button>
           </div>
         </div>
       </section>
