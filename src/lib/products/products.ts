@@ -85,9 +85,14 @@ function mapSeedToProduct(
 
 const FALLBACK_PRODUCTS: Product[] = SEED_PRODUCTS.map(mapSeedToProduct);
 
-function mergeWithFallback(dbProducts: Product[]): Product[] {
-  const dbSlugs = new Set(dbProducts.map((p) => p.slug));
-  const missing = FALLBACK_PRODUCTS.filter((p) => !dbSlugs.has(p.slug));
+/**
+ * @param dbProducts   active DB products to show
+ * @param knownSlugs    every slug that exists in the DB (active *or* inactive) —
+ *                      a seed fallback is only added for a slug the DB doesn't
+ *                      know at all, so deactivating a product actually hides it.
+ */
+function mergeWithFallback(dbProducts: Product[], knownSlugs: Set<string>): Product[] {
+  const missing = FALLBACK_PRODUCTS.filter((p) => !knownSlugs.has(p.slug));
   if (missing.length === 0) return [...dbProducts].sort(byCategoryThenOrder);
   return [...dbProducts, ...missing].sort(byCategoryThenOrder);
 }
@@ -111,18 +116,22 @@ export async function getProducts(): Promise<Product[]> {
 
   try {
     const supabase = await createClient();
-    const result = await withTimeout(
-      supabase
-        .from("products")
-        .select("*")
-        .eq("active", true)
-        .order("category")
-        .order("title"),
-      SUPABASE_TIMEOUT_MS
-    );
+    const [result, deactivated] = await Promise.all([
+      withTimeout(
+        supabase.from("products").select("*").eq("active", true).order("category").order("title"),
+        SUPABASE_TIMEOUT_MS,
+      ),
+      getDeactivatedSlugs(supabase),
+    ]);
 
     if (!result || result.error || !result.data?.length) return FALLBACK_PRODUCTS;
 
+    // A slug is "known" to the DB if it's an active row OR explicitly deactivated —
+    // either way its seed fallback must not re-surface it.
+    const knownSlugs = new Set<string>([
+      ...result.data.map((p) => p.slug as string),
+      ...deactivated,
+    ]);
     const dbProducts = result.data.map((p) =>
       withProductPrice(
         enrichProductFromSeed({
@@ -133,9 +142,22 @@ export async function getProducts(): Promise<Product[]> {
       )
     ) as Product[];
 
-    return mergeWithFallback(dbProducts);
+    return mergeWithFallback(dbProducts, knownSlugs);
   } catch {
     return FALLBACK_PRODUCTS;
+  }
+}
+
+type AnyClient = Awaited<ReturnType<typeof createClient>>;
+
+/** Slugs of products an admin has deactivated (RLS hides the rows themselves). */
+async function getDeactivatedSlugs(supabase: AnyClient): Promise<string[]> {
+  try {
+    const res = await withTimeout(supabase.rpc("deactivated_product_slugs"), SUPABASE_TIMEOUT_MS);
+    if (!res || res.error || !Array.isArray(res.data)) return [];
+    return res.data as string[];
+  } catch {
+    return [];
   }
 }
 
@@ -159,11 +181,17 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
         .select("*")
         .eq("slug", slug)
         .eq("active", true)
-        .single(),
+        .maybeSingle(),
       SUPABASE_TIMEOUT_MS
     );
 
-    if (!result || result.error || !result.data) return seedFallback();
+    if (!result || result.error) return seedFallback();
+    if (!result.data) {
+      // No visible row. If it's an admin-deactivated product, it's gone — don't
+      // fall back to seed. Otherwise it was simply never migrated.
+      const deactivated = await getDeactivatedSlugs(supabase);
+      return deactivated.includes(slug) ? null : seedFallback();
+    }
     return withProductPrice(
       enrichProductFromSeed({
         ...result.data,
@@ -287,42 +315,9 @@ export async function getNavCatalog(): Promise<NavCatalogCategory[]> {
 export async function getBusinessCardsBySubcategory(
   subcategory: string
 ): Promise<Product[]> {
-  if (!isSupabaseConfigured()) {
-    return FALLBACK_PRODUCTS.filter(
-      (p) => p.category === "Business Cards" && p.subcategory === subcategory
-    );
-  }
-
-  try {
-    const supabase = await createClient();
-    const result = await withTimeout(
-      supabase
-        .from("products")
-        .select("*")
-        .eq("active", true)
-        .eq("category", "Business Cards")
-        .eq("subcategory", subcategory)
-        .order("title"),
-      SUPABASE_TIMEOUT_MS
-    );
-
-    if (!result || result.error || !result.data?.length) {
-      return FALLBACK_PRODUCTS.filter(
-        (p) => p.category === "Business Cards" && p.subcategory === subcategory
-      );
-    }
-    return result.data.map((p) =>
-      withProductPrice(
-        enrichProductFromSeed({
-          ...p,
-          price: p.price != null ? Number(p.price) : null,
-          pricing_rules: normalizePricingRules(p.pricing_rules),
-        })
-      )
-    ) as Product[];
-  } catch {
-    return FALLBACK_PRODUCTS.filter(
-      (p) => p.category === "Business Cards" && p.subcategory === subcategory
-    );
-  }
+  // Reuse getProducts() so deactivation + seed-fallback suppression stay consistent.
+  const products = await getProducts();
+  return products
+    .filter((p) => p.category === "Business Cards" && p.subcategory === subcategory)
+    .sort((a, b) => a.title.localeCompare(b.title));
 }
