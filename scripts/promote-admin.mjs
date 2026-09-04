@@ -3,9 +3,10 @@
  * Grant (or revoke) the admin role for an existing Supabase auth user.
  *
  * Admin authorization is read server-side from `app_metadata.role === "admin"`
- * (see src/lib/auth.ts). This script is the *privileged process* that sets that
- * claim — it needs the service-role key and is meant to be run by a project
- * owner, never exposed to the app.
+ * (see src/lib/auth.ts). This script is the *only* privileged process that
+ * sets that claim — nothing in the app (including the OAuth callback) grants
+ * it automatically. It needs the service-role key and is meant to be run by a
+ * project owner, never exposed to the app.
  *
  *   SUPABASE_SERVICE_ROLE_KEY=... NEXT_PUBLIC_SUPABASE_URL=... \
  *     node scripts/promote-admin.mjs someone@example.com          # grant

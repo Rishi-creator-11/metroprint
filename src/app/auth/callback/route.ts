@@ -1,72 +1,43 @@
 import { NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { isAdminUser, sanitizeRedirectPath } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
+import { sanitizeRedirectPath } from "@/lib/auth";
 
 /**
- * OAuth / PKCE callback. Exchanges the `?code` for a session, then — for a
- * small, explicit allowlist only — grants the `app_metadata.role = admin`
- * claim through the service role. Arbitrary Google users are never promoted.
+ * General-purpose OAuth / PKCE callback for every signed-in user — customers
+ * and admins alike. It only ever does one thing: exchange the `?code` for a
+ * session and send the browser to a same-site destination.
  *
- * Admin authorization itself is still enforced server-side (middleware +
- * `requireAdminUser` / `requireAdminApi`) against `app_metadata`, not here.
+ * It never grants, checks, or reasons about the admin role. Admin
+ * authorization is enforced separately and only from server-verified
+ * `app_metadata.role` (see src/lib/auth.ts `isAdminUser`, used by
+ * middleware.ts and requireAdminUser/requireAdminApi) — never here, never
+ * from user_metadata, never from the caller's email.
  */
-
-function adminAllowlist(): string[] {
-  return (process.env.ADMIN_EMAIL_ALLOWLIST ?? "")
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-}
-
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const redirectParam = sanitizeRedirectPath(url.searchParams.get("redirect"), "/admin");
+  // Accept either `redirect` (used by /login, /signup, /admin/login) or the
+  // more common OAuth convention `next`.
+  const destination = sanitizeRedirectPath(
+    url.searchParams.get("redirect") ?? url.searchParams.get("next"),
+    "/account",
+  );
   const origin = url.origin;
+  // Bounce sign-in errors back to whichever login screen sent the customer
+  // here (purely a UX choice based on the requested destination — no
+  // authorization decision is made in this route).
+  const loginScreen = destination.startsWith("/admin") ? "/admin/login" : "/login";
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/admin/login?error=oauth`);
+    return NextResponse.redirect(`${origin}${loginScreen}?error=oauth`, 303);
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-  if (error || !data.user) {
-    return NextResponse.redirect(`${origin}/admin/login?error=oauth`);
+  if (error) {
+    return NextResponse.redirect(`${origin}${loginScreen}?error=oauth`, 303);
   }
 
-  const email = (data.user.email ?? "").toLowerCase();
-  const allowlisted = email.length > 0 && adminAllowlist().includes(email);
-
-  // Privileged, allowlist-gated promotion. Never touches user_metadata.
-  if (allowlisted && !isAdminUser(data.user)) {
-    try {
-      const service = await createServiceClient();
-      const current = data.user.app_metadata ?? {};
-      await service.auth.admin.updateUserById(data.user.id, {
-        app_metadata: { ...current, role: "admin" },
-      });
-      // Re-issue the session so downstream reads see the new claim promptly.
-      await supabase.auth.refreshSession();
-    } catch (err) {
-      console.error("Admin auto-provision failed:", err);
-    }
-  }
-
-  // Re-fetch authoritative role via the service role.
-  let isAdmin = false;
-  try {
-    const service = await createServiceClient();
-    const { data: fresh } = await service.auth.admin.getUserById(data.user.id);
-    isAdmin = isAdminUser(fresh?.user);
-  } catch {
-    isAdmin = isAdminUser(data.user);
-  }
-
-  if (!isAdmin) {
-    await supabase.auth.signOut();
-    return NextResponse.redirect(`${origin}/admin/login?error=unauthorized`);
-  }
-
-  return NextResponse.redirect(`${origin}${redirectParam}`);
+  return NextResponse.redirect(`${origin}${destination}`, 303);
 }
