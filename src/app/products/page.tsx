@@ -16,7 +16,7 @@ export const metadata = {
 const BUSINESS_CARD_LINES = [
   { key: "standard", label: "Standard", match: (p: Product) => p.slug.startsWith("business-cards-standard") },
   { key: "premium", label: "Premium", match: (p: Product) => p.slug.startsWith("business-cards-premium") },
-  { key: "specialty", label: "Custom", match: (p: Product) => p.slug.startsWith("business-cards-specialty") },
+  { key: "specialty", label: "Specialty", match: (p: Product) => p.slug.startsWith("business-cards-specialty") },
 ] as const;
 
 function groupBusinessCards(products: Product[]) {

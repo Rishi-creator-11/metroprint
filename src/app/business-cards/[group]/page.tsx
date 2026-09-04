@@ -19,7 +19,7 @@ const GROUPS: Record<string, { title: string; subcategory: string; description: 
       "Elevated finishes and materials — metallic foil, kraft paper, spot UV, soft touch, painted edge and more.",
   },
   custom: {
-    title: "Custom Business Cards",
+    title: "Specialty Business Cards",
     subcategory: "Custom",
     description: "Unique formats that make an unforgettable impression — fold-over, plastic and magnetic.",
   },

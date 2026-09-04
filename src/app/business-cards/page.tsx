@@ -27,7 +27,7 @@ const GROUPS = [
     image: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&h=400&fit=crop",
   },
   {
-    name: "Custom Business Cards",
+    name: "Specialty Business Cards",
     slug: "custom",
     subcategory: "Custom",
     description: "Fold-over, plastic and magnetic cards for a truly unique impression.",

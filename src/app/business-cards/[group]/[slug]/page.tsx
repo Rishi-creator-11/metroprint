@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 const GROUP_LABELS: Record<string, string> = {
   standard: "Standard Business Cards",
   premium: "Premium Business Cards",
-  custom: "Custom Business Cards",
+  custom: "Specialty Business Cards",
 };
 
 export async function generateMetadata({

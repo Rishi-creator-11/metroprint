@@ -208,7 +208,7 @@ const quantityPrint = (opts: string[]): OptionsSchema => ({
 const SEED_PRODUCTS_BASE: Omit<Product, "id" | "created_at" | "price">[] = [
   // Apparel
   {
-    title: "Custom T-Shirt Printing",
+    title: "T-Shirt Printing",
     slug: "custom-t-shirt-printing",
     category: "Apparel",
     description:
@@ -224,7 +224,7 @@ const SEED_PRODUCTS_BASE: Omit<Product, "id" | "created_at" | "price">[] = [
     }),
   },
   {
-    title: "Custom Long-Sleeve T-Shirt Printing",
+    title: "Long-Sleeve T-Shirt Printing",
     slug: "custom-long-sleeve-t-shirt-printing",
     category: "Apparel",
     description:
@@ -240,7 +240,7 @@ const SEED_PRODUCTS_BASE: Omit<Product, "id" | "created_at" | "price">[] = [
     }),
   },
   {
-    title: "Custom Polo Printing",
+    title: "Polo Printing",
     slug: "custom-polo-printing",
     category: "Apparel",
     description:
@@ -255,7 +255,7 @@ const SEED_PRODUCTS_BASE: Omit<Product, "id" | "created_at" | "price">[] = [
     }),
   },
   {
-    title: "Custom Hoodie Printing",
+    title: "Hoodie Printing",
     slug: "custom-hoodie-printing",
     category: "Apparel",
     description:
@@ -270,7 +270,7 @@ const SEED_PRODUCTS_BASE: Omit<Product, "id" | "created_at" | "price">[] = [
     }),
   },
   {
-    title: "Custom Hats",
+    title: "Hats",
     slug: "custom-hats",
     category: "Apparel",
     description:
@@ -894,7 +894,7 @@ const SEED_PRODUCTS_BASE: Omit<Product, "id" | "created_at" | "price">[] = [
 
   // Promotional Products
   {
-    title: "Custom Mugs",
+    title: "Mugs",
     slug: "custom-mugs",
     category: "Promotional Products",
     description: "Branded ceramic mugs for corporate gifts and promotional campaigns.",
@@ -905,7 +905,7 @@ const SEED_PRODUCTS_BASE: Omit<Product, "id" | "created_at" | "price">[] = [
     options_schema: quantityPrint(["12", "24", "48", "72", "144"]),
   },
   {
-    title: "Custom Tumblers",
+    title: "Tumblers",
     slug: "custom-tumblers",
     category: "Promotional Products",
     description: "Insulated tumblers with your logo for lasting brand visibility.",
