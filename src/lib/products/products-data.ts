@@ -349,7 +349,7 @@ const SEED_PRODUCTS_BASE: Omit<Product, "id" | "created_at" | "price">[] = [
     category: "Business Cards",
     subcategory: "Standard",
     description:
-      "Standard business cards from MetroPrint USA (MKT1). Choose stock weight, matte or UV gloss finish, corner style, quantity, and sides.",
+      "Standard business cards. Choose stock weight, matte or UV gloss finish, corner style, quantity, and sides.",
     base_price_text: "Starting at $29/500",
     image_url: BUSINESS_CARD_IMAGE,
     active: true,
@@ -358,7 +358,7 @@ const SEED_PRODUCTS_BASE: Omit<Product, "id" | "created_at" | "price">[] = [
   premiumProduct(
     "Metallic Foil Business Cards",
     "business-cards-premium-metallic-foil-raised",
-    "Raised foil business cards with silver or gold custom foil printing. High-end look for professional branding — MetroPrint USA (MKT1).",
+    "Raised foil business cards with silver or gold custom foil printing. High-end look for professional branding.",
     premiumBaseOptions([
       {
         name: "foil_color",
@@ -379,19 +379,19 @@ const SEED_PRODUCTS_BASE: Omit<Product, "id" | "created_at" | "price">[] = [
   premiumProduct(
     "Kraft Paper Business Cards",
     "business-cards-premium-kraft-paper",
-    "Natural kraft business cards with a rustic, eco-friendly look. 100% recyclable — best for bold, dark-colored designs. MetroPrint USA (MKT1).",
+    "Natural kraft business cards with a rustic, eco-friendly look. 100% recyclable — best for bold, dark-colored designs.",
     premiumBaseOptions()
   ),
   premiumProduct(
     "Durable Business Cards",
     "business-cards-premium-durable",
-    "Waterproof and tear-resistant synthetic business cards. 100% recyclable and built to last in tough conditions — MetroPrint USA (MKT1).",
+    "Waterproof and tear-resistant synthetic business cards. 100% recyclable and built to last in tough conditions.",
     premiumBaseOptions()
   ),
   premiumProduct(
     "Spot UV Business Cards",
     "business-cards-premium-spot-uv-raised",
-    "Laminated business cards with raised clear spot UV gloss applied to areas of your choice. Adds tactile, premium detail — MetroPrint USA (MKT1).",
+    "Laminated business cards with raised clear spot UV gloss applied to areas of your choice. Adds tactile, premium detail.",
     premiumBaseOptions([
       BC_LAMINATION_FIELD,
       {
@@ -407,14 +407,14 @@ const SEED_PRODUCTS_BASE: Omit<Product, "id" | "created_at" | "price">[] = [
   premiumProduct(
     "Soft Touch Business Cards",
     "business-cards-premium-soft-touch-suede",
-    "Soft touch (suede) business cards with a luxurious velvet-like surface. 19pt thickness with scratch and smudge protection — MetroPrint USA (MKT1).",
+    "Soft touch (suede) business cards with a luxurious velvet-like surface. 19pt thickness with scratch and smudge protection.",
     premiumBaseOptions(),
     "Starting at $27/25"
   ),
   premiumProduct(
     "32pt Painted Edge Business Cards",
     "business-cards-premium-32pt-painted-edge",
-    "Thick 32pt uncoated business cards with painted colored edges. Choose from popular edge colors for a bold first impression — MetroPrint USA (MKT1).",
+    "Thick 32pt uncoated business cards with painted colored edges. Choose from popular edge colors for a bold first impression.",
     {
       fields: [
         {
@@ -459,7 +459,7 @@ const SEED_PRODUCTS_BASE: Omit<Product, "id" | "created_at" | "price">[] = [
   premiumProduct(
     "Fold-over Business Cards",
     "business-cards-specialty-fold-over",
-    "Fold-over business cards that open to reveal extra space for your message, logo, or offer — MetroPrint USA (MKT1).",
+    "Fold-over business cards that open to reveal extra space for your message, logo, or offer.",
     {
       fields: [
         {
@@ -498,7 +498,7 @@ const SEED_PRODUCTS_BASE: Omit<Product, "id" | "created_at" | "price">[] = [
   premiumProduct(
     "Plastic Business Cards",
     "business-cards-specialty-plastic",
-    "Durable plastic business cards in clear, frosted, or white — choose oval or rounded corners. MetroPrint USA (MKT1).",
+    "Durable plastic business cards in clear, frosted, or white — choose oval or rounded corners.",
     {
       fields: [
         {
@@ -551,7 +551,7 @@ const SEED_PRODUCTS_BASE: Omit<Product, "id" | "created_at" | "price">[] = [
   premiumProduct(
     "Magnetic Business Cards",
     "business-cards-specialty-magnetic",
-    "Magnetic business cards that stick to fridges, filing cabinets, and metal surfaces — MetroPrint USA (MKT1).",
+    "Magnetic business cards that stick to fridges, filing cabinets, and metal surfaces.",
     {
       fields: [
         {
