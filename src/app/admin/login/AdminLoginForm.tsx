@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { sanitizeRedirectPath } from "@/lib/auth";
 import { Button } from "@/components/ui/Button";
-import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import { GoogleAuthButton, GOOGLE_AUTH_ENABLED } from "@/components/auth/GoogleAuthButton";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Loader2, ShieldCheck } from "lucide-react";
 
@@ -23,7 +23,7 @@ export default function AdminLoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(!GOOGLE_AUTH_ENABLED);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,12 +77,15 @@ export default function AdminLoginForm() {
       {/* Same general callback every customer uses — this form grants no admin
           access itself. Whether the signed-in account is an admin is decided
           afterwards, server-side, from app_metadata. */}
-      <GoogleAuthButton redirectTo={redirect} />
-
-      <div className="my-5 flex items-center gap-3 text-xs text-muted">
-        <span className="h-px flex-1 bg-border" /> or
-        <span className="h-px flex-1 bg-border" />
-      </div>
+      {GOOGLE_AUTH_ENABLED && (
+        <>
+          <GoogleAuthButton redirectTo={redirect} />
+          <div className="my-5 flex items-center gap-3 text-xs text-muted">
+            <span className="h-px flex-1 bg-border" /> or
+            <span className="h-px flex-1 bg-border" />
+          </div>
+        </>
+      )}
 
       {!showPassword ? (
         <button

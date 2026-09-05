@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/Button";
-import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import { GoogleAuthButton, GOOGLE_AUTH_ENABLED } from "@/components/auth/GoogleAuthButton";
 import { createClient } from "@/lib/supabase/client";
 import { sanitizeRedirectPath } from "@/lib/auth";
 import { Loader2 } from "lucide-react";
@@ -64,12 +64,15 @@ export function LoginForm() {
         </div>
       )}
 
-      <GoogleAuthButton redirectTo={redirect} />
-
-      <div className="my-5 flex items-center gap-3 text-xs text-muted">
-        <span className="h-px flex-1 bg-border" /> or continue with email
-        <span className="h-px flex-1 bg-border" />
-      </div>
+      {GOOGLE_AUTH_ENABLED && (
+        <>
+          <GoogleAuthButton redirectTo={redirect} />
+          <div className="my-5 flex items-center gap-3 text-xs text-muted">
+            <span className="h-px flex-1 bg-border" /> or continue with email
+            <span className="h-px flex-1 bg-border" />
+          </div>
+        </>
+      )}
 
       <form onSubmit={handleLogin} className="space-y-4" noValidate>
         <div>

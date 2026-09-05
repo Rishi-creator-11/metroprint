@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Loader2, RotateCw } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
+export const GOOGLE_AUTH_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === "true";
+
 /** Shared "Continue with Google" button for /login, /signup, and /admin/login. */
 export function GoogleAuthButton({
   redirectTo,
@@ -15,6 +17,10 @@ export function GoogleAuthButton({
 }) {
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
   const [message, setMessage] = useState("");
+
+  // Fail closed until the provider has been configured and verified. This
+  // prevents users from being sent to Supabase's raw provider-disabled page.
+  if (!GOOGLE_AUTH_ENABLED) return null;
 
   const start = async () => {
     setState("loading");
